@@ -1,0 +1,28 @@
+div#intro {
+    text-align: center;
+    margin: 40px;
+    padding: 40px;
+}
+
+img {
+    width: 25%;
+    height: 25%;
+}
+
+p {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;   
+}
+
+body {
+    background-color: limegreen;
+}
+
+
+div#content {
+    padding: 20px;
+}
+
+div#external {
+    padding: 20px;
+}
+
