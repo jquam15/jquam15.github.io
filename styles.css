@@ -91,6 +91,11 @@ a, a:visited {
     text-decoration: none;
 }
 
+.vertical {
+    border-left: 3px solid #BFA181;
+    height: 20px;
+}
+
 
 
 
