@@ -11,6 +11,18 @@ section div h1, h2 {
     color:#BFA181;
 }
 
+h6.carousel-title
+{
+    color:#0A1828;
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.carousel-link {
+    color:#0A1828;
+    font-weight:bold;
+}
+
 h6 {
     color:#178582;
 }
@@ -96,8 +108,9 @@ a, a:visited {
     height: 20px;
 }
 
-
-
+.align-items-center h6 {
+    color:#BFA181;
+}
 
 
 
