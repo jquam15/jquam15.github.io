@@ -48,6 +48,10 @@ img {
     padding-right: 4%;
 }
 
+.text-title-right {
+    padding-right: 10%;
+}
+
 .fig-title-right {
     padding-right: 25%;
     font-size: 1.5em;
