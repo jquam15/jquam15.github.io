@@ -7,10 +7,94 @@
     <title>2022-2023 NFL Playoff Preview</title>
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <!-- My personal stylesheet -->
+    <link rel="stylesheet" href="nflstyles.css">
 </head>
 <body>
-    <h1 class="display-1">Welcome to my 2022 NFL Playoff Preview</h1>
-    <a href="index.html">Return to Homepage</a>
+
+    <!-- Navigation back to homepage -->
+    <nav class="navbar navbar-expand-md navbar-light py-3">
+        <div class="container-xxl">
+            <div class="collapse navbar-collapse justify-content-end align-center" id="main-nav">
+                <div class="navbar-nav">
+                    <a href="index.html" class="nav-item nav-link">Return to Homepage</a>
+                </div>
+        </div>
+    </nav>
+
+    <!-- Hello -->
+    <section id="home">
+        <div class="container-xl pt-3">
+            <div class="row justify-content-center align-items-center">
+                <!-- Name main title -->
+                <div class="col-md-8 text-center align-items-center">
+                    <h4 class="display-4 text-center mb-3">My 2022 NFL Playoff Preview!</h4>
+                    <p>Check out the code on my <a href="https://github.com/jquam15/2022_NFL_Playoff_Preview" class="text-decoration-underline">Github!</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main article -->
+    <article class="mt-5">
+        <!-- First row -->
+        <div class="row align-top">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">What is Net Yards Per Pass Attempt?</h6>
+                <p class="text-lead">One of the most predictive metrics for NFL team success is one that may not appear on many broadcasts or come up in 
+                    casual conversations. It may not be as obvious as turnovers or as flashy as a great pass rush, but it can be quite powerful in separating a 
+                    good team from a bad one. Net yards per pass attempt is simply found by taking a team's offensive yards per pass attempt and 
+                    subtracting the defenses's yards per pass attempt allowed. For example, we can see from the table on the right that for the season, Tom Brady's 
+                    Buccaneers offense averaged 6.3 yards per pass attempt, while the Bucs defense allowed just 6.1 yards per pass attempt to opposing 
+                    quarterbacks. This comes out to a net yards per pass of 0.2 which means that, on average, the Bucs gained 0.2 more yards than 
+                    their opponent on each pass play. This may seem insignificant, but think about how many pass plays there are in a season, and 
+                    you can quickly see how those yards can add up.</p>
+                <p class="text-article">The beautiful thing about using net yards per pass as a metric is that it gives a numerical value to the 
+                    intuitive concepts that any football fan can see impact success. More specifically, it captures how much more effectively a team's 
+                    offense is throwing the ball compared to their opponents. You may not think of it like that while watching the game on Sundays, but every
+                    fan knows they're in a good spot if they can pass the ball more efficiently than their opponent.</p>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <img src="images/table_2022.png" alt="2022 table">
+                    <figcaption class="mt-2">Net Yards per Pass Attempt and Winning Percentage for 2022-23 Playoff Teams</figcaption>
+                </figure>
+            </div>
+        </div>
+
+         <!-- Second row -->
+         <div class="row align-top mt-5">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <img src="images/netya_historical_v2.png" alt="Historical Plot" class="left-image">
+                    <figcaption class="mt-2"></figcaption>
+                </figure>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">Historical Analysis of Net Yards per Pass</h6>
+                <p class="text-article">Some more text here. </p>
+            </div>
+        </div>
+        <!-- Third  row -->
+        <div class="row align-top mt-5 mb-5">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">What it Means for the 2022-23 Playoffs</h6>
+                <p class="text-article">Some text here</p>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <img src="images/netya_2022.png" alt="2022 table">
+                    <figcaption class="mt-2"></figcaption>
+                </figure>
+            </div>
+        </div>
+    </article>
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 </body>
