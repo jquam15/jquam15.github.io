@@ -31,10 +31,9 @@ img {
 }
 
 .left-image {
-    width: 100%;
+    width: 90%;
     padding-left: 10%;
     padding-right: 5%;
-    ;
 }
 
 .text-lead {
@@ -43,6 +42,22 @@ img {
 
 .text-article {
     padding-left: 5%;
+}
+
+.text-right {
+    padding-right: 4%;
+}
+
+.fig-title-right {
+    padding-right: 25%;
+    font-size: 1.5em;
+    color:#BFA181;
+}
+
+.fig-title-left {
+    padding-right: 20%;
+    font-size: 1.5em;
+    color:#BFA181;
 }
 
 .text-lead:first-letter {

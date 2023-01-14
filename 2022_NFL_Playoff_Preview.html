@@ -42,7 +42,7 @@
             <!-- Left column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <h6 class="display-6 text-center">What is Net Yards Per Pass Attempt?</h6>
-                <p class="text-lead">One of the most predictive metrics for NFL team success is one that may not appear on many broadcasts or come up in 
+                <p class="text-lead mt-3">One of the most predictive metrics for NFL team success is one that may not appear on many broadcasts or come up in 
                     casual conversations. It may not be as obvious as turnovers or as flashy as a great pass rush, but it can be quite powerful in separating a 
                     good team from a bad one. Net yards per pass attempt is simply found by taking a team's offensive yards per pass attempt and 
                     subtracting the defenses's yards per pass attempt allowed. For example, we can see from the table on the right that for the season, Tom Brady's 
@@ -53,11 +53,12 @@
                 <p class="text-article">The beautiful thing about using net yards per pass as a metric is that it gives a numerical value to the 
                     intuitive concepts that any football fan can see impact success. More specifically, it captures how much more effectively a team's 
                     offense is throwing the ball compared to their opponents. You may not think of it like that while watching the game on Sundays, but every
-                    fan knows they're in a good spot if they can pass the ball more efficiently than their opponent.</p>
+                    fan knows their team in a good spot if they can pass the ball more efficiently than their opponent.</p>
             </div>
             <!-- Right column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <figure>
+                    <figcaption class="mb-2 text-center fig-title-right">Figure 1</figcaption>
                     <img src="images/table_2022.png" alt="2022 table">
                     <figcaption class="mt-2">Net Yards per Pass Attempt and Winning Percentage for 2022-23 Playoff Teams</figcaption>
                 </figure>
@@ -69,6 +70,7 @@
             <!-- Left column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <figure>
+                    <figcaption class="mb-2 text-center fig-title-left">Figure 2</figcaption>
                     <img src="images/netya_historical_v2.png" alt="Historical Plot" class="left-image">
                     <figcaption class="mt-2"></figcaption>
                 </figure>
@@ -76,7 +78,18 @@
             <!-- Right column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <h6 class="display-6 text-center">Historical Analysis of Net Yards per Pass</h6>
-                <p class="text-article">Some more text here. </p>
+                <p class="text-right mt-3">As previously stated, net yards per pass attempt is one of the best predictors of winning percentage
+                     historically. I gathered offensive and defensive passing statistics for every NFL team from 1971 to 2019 as well as collected 
+                     the team's record for that respective season. As a result I was able to perform a Linear Regression using net yards per pass 
+                     as the explanatory variable and win percentage as the response variable. The results are shown by the red line on the plot to 
+                     the left. As you can see, the trend line fits the data well. </p> 
+                <p class="text-right">Now for some statistical jargon: the correlation coefficient (R) 
+                     of this regression was .718, while the coefficient of determination (R-squared) was .516. What this value of R means in simpler 
+                     terms is that there is a strong, positive, linear relationship between net yards per pass and winning percentage. The data 
+                     exhibits a linear upward trend meaning the better the team's net yards per pass, the better their win percentage is expected to 
+                     be. Once again, the plot on the right offers clear evidence of this being the case. An R-squared value of .516 tells us that 51.6% of the variation in winning percentage can be explained by a team's net 
+                     yards per pass. There are certainly models that can explain more than 51.6% of the variation, but for one simple metric, this 
+                     is quite good.</p>
             </div>
         </div>
         <!-- Third  row -->
@@ -84,13 +97,29 @@
             <!-- Left column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <h6 class="display-6 text-center">What it Means for the 2022-23 Playoffs</h6>
-                <p class="text-article">Some text here</p>
+                <p class="text-article mt-3">Unfortunately for those that are looking for a flashy prediction, you won't find one here. Of the 
+                    51 Super Bowl champions from 1971-2021, 35 of them had a net yards per pass attempt of 1.0 or over. So slightly over 2/3 of 
+                    all super bowl champions since nfl.com began tracking stats have hit that benchmark. Additionally, the last 3 Super Bowl champions 
+                    (Chiefs, Bucs, and Rams) have all exceeded 1.0 net yards per pass atempt. By looking at Figure 3 on the right, we can see that there are 
+                    5 teams that have reached or exceeded 1.0 net yards per pass this year. The 4 Super Bowl favorites, Chiefs, Bills, Eagles, and 49ers, 
+                    and then the Dolphins would seem to be the prime candidates to win the Super Bowl this year. With Miami being forced to play 3rd 
+                    string QB, Skylar Thompson, I think it's fair to cross the Dolphins off from this group as their passing attack is a shell of itself 
+                    at the moment. Once again, I'm not going out on a limb here by predicting one of the top 2 seeds from either conference will win the 
+                    Super Bowl this year, but based on historical trends that is likely to be the case.</p>
+                <p class="text-article mt-3">Perhaps more interesting are the pair of first round underdogs that would seem to have the advantage by net 
+                    yards per pass. Both the Jaguars and Giants are underdogs against the Chargers and Vikings respectively, despite having the advantage 
+                    in net yards per pass. In fact, the Vikings even have a negative net yards per pass, joining the Ravens as the only teams with a 
+                    negative margin to make the playoffs this year. Both those teams are looking to be just the 3rd team in over 50 years to win the Super 
+                    Bowl with a negative net yards per pass, joining the 2007 Giants and 2014 Patriots. Much has been made of the Vikings fluky record 
+                    considering their point differential, and that is given further credence by Figure 3. I'd look for the Giants to pull off one of the 
+                    few "upsets" of this years playoffs against the Vikings. It may not be a playoffs full of surprises, but it's sure to be entertaining 
+                    as usual.</p>
             </div>
             <!-- Right column -->
             <div class="col-6 col-lg-6 col-xl-6">
                 <figure>
+                    <figcaption class="mb-2 text-center fig-title-right">Figure 3</figcaption>
                     <img src="images/netya_2022.png" alt="2022 table">
-                    <figcaption class="mt-2"></figcaption>
                 </figure>
             </div>
         </div>
