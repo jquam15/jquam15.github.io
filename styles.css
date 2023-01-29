@@ -10,6 +10,7 @@
 
 .home-text {
     font-weight: 400;
+    display: inline;
 }
 
 body {
@@ -63,7 +64,7 @@ a .btn {
     text-decoration: none;
     font-size: 36px;
     border-radius: 25px;
-    width: 25%;
+    /* width: 75%; */
 }
 
 .btn:hover, .btn-active {
@@ -143,6 +144,7 @@ a, a:visited {
 .vertical {
     border-left: 3px solid #BFA181;
     height: 20px;
+    padding: 0 1% 0 2%;
 }
 
 .align-items-center h6 {
