@@ -1,0 +1,90 @@
+body {
+    background-color: #0A1828;
+}
+
+tr, td {
+    color: #BFA181 !important;
+    background-color: #0A1828;
+}
+
+thead tr th {
+    color:#178582;
+}
+
+tbody tr th {
+    color: #BFA181;
+}
+
+h1 {
+    color:#178582;
+}
+
+table {
+    border-color: #BFA181 !important;
+}
+
+label {
+    color:#BFA181;
+}
+
+/* input {
+    background: #178582;
+    color:#BFA181;
+} */
+
+a.page-link {
+    background-color:#178582;
+    color:#0A1828;
+    border-color:#0A1828;
+}
+
+a.page-link:hover {
+    background-color: #BFA181;
+    color:#0A1828;
+    border-color: #0A1828;
+}
+
+[aria-disabled="true"] {
+    background-color:#178582 !important;
+    color:#0A1828 !important;
+    border-color:#0A1828 !important;
+}
+
+/* [aria-disabled="false"] {
+    background-color:#0A1828 !important;
+    color:#BFA181 !important;
+    border-color:#178582 !important;
+} */
+
+[data-dt-idx="previous"], [data-dt-idx="next"] {
+    background-color:#178582 !important;
+    color:#0A1828 !important;
+    border-color:#0A1828 !important;
+}
+
+div#main-table_info {
+    color:#BFA181;
+}
+
+.pagination {
+    --bs-pagination-active-bg: #0A1828;
+    --bs-pagination-active-color: #BFA181;
+    --bs-pagination-active-border-color: #0A1828;
+}
+
+select.form-select {
+    background-color:#0A1828;
+    color:#BFA181;
+    border-color:#BFA181;
+}
+
+input.form-control {
+    background-color:#0A1828;
+    color:#BFA181;
+    border-color:#BFA181;
+}
+
+[type="search"] {
+    background-color:#0A1828 !important;
+    color:#BFA181 !important;
+}

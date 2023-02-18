@@ -1,0 +1,3503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Model</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    
+    <!-- bootstrap 5 table styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
+    <!-- My personal table styling -->
+    <link rel="stylesheet" href="table.css">
+    <!-- javascript files for creating table with pagination, searchability, and sortable columns -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/dataTables.bootstrap5.min.js"></script>
+    <!-- My personal stylesheet -->
+    <link rel="stylesheet" href="transfers.css">
+</head>
+<body>
+
+
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-light py-3 navbar-toggle" id="top">
+
+        <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+
+        <div class="container-xxl">
+            <div class="collapse navbar-collapse justify-content-end align-center" id="main-nav">
+                <div class="navbar-nav">
+                    <a href="#predictions" class="nav-item nav-link">Predictions</a>
+                    <a href="index.html" class="nav-item nav-link">Return to Homepage</a>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home">
+        <div class="container-xl pt-3">
+            <div class="row justify-content-center align-items-center">
+                <!-- Name main title -->
+                <div class="col-md-8 text-center align-items-center">
+                    <h4 class="display-4 text-center mb-3">Welcome to My Transfer Model Breakdown and Analysis!</h4>
+                    <p>Check out the code on my <a href="https://github.com/jquam15/transfer_model" class="text-decoration-underline">Github!</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main article -->
+    <article class="mt-5">
+        <!-- First row (Introduction) -->
+        <div class="row align-top" id="intro">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">Introduction</h6>
+                <p class="text-lead mt-3">The legalization of name, image, and likeness <a href="https://www.si.com/fannation/college/cfb-hq/ncaa-football/college-football-nil-rule-changes-what-you-need-to-know">(NIL)</a> 
+                    and the <a href="https://www.cbssports.com/college-football/news/ncaa-board-of-directors-ratifies-one-time-transfer-legislation-allowing-athletes-immediate-eligibility/">"one time transfer rule"</a> 
+                    has caused major changes in collegiate athletics over the past couple of years. In large part due to these changes, the rising number of transfers 
+                    has led to the transfer portal being one of the most important recruiting factors for college basketball teams to monitor. Whether a 
+                    team is looking for a roster overhaul with a new coach, or looking to find the last missing piece to fill out their roster, the transfer 
+                    portal provides potential solutions to traditional problems in roster construction. Unfortunately, not all transfers turn into success stories at 
+                    their new schools. It takes great effort, skill, and a little bit of luck to evaluate which transfers each year will be effective players at their new schools. 
+                    I built my transfer model to use as a tool in evaluating which transfers will be effective players at their new schools. I will go into a lot of detail 
+                    about my model and process throughout this page, but for now I will start by describing the data I used.</p>
+                <p class="text-article">To create an effective transfer model, I first needed to acquire data on which players were transferring, 
+                    where they were transferring to, their stats for the year before transferring (to use as feature data), information about their 
+                    season after transferring (whether they moved to a better conference, etc.), and a measurement of performance for their year after 
+                    transferring (<a href="https://www.basketball-reference.com/about/bpm2.html">Box Plus Minus</a>). The post transfer season BPM is the "target" data that I attempt to predict. I acquired the data about transfers and where they were transferring to from the 
+                    <a href="https://www.verbalcommits.com/transfers/2021">verbal commits website</a>, and I acquired all the player stats from 
+                    <a href="https://www.sports-reference.com/cbb/play-index/psl_finder.cgi">basketball reference</a>. After cleaning and merging 
+                    the data, I was able to construct a dataset that contained a player's stats, transfer information, pre transfer performance, 
+                    and post transfer performance. An example of what this data looks like can be seen in Figure 1. I'll go into more detail about 
+                    what some of those columns mean later on if there is any confusion, but the general gist of what the data looks like can be seen in 
+                    that figure. One important thing to note is that only players who played 75% of their team's games in both their pre transfer 
+                    AND post transfer season are included in the data. This criteria was established so that there was a sufficient sample size for 
+                    each player.</p>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 text-center fig-title-right">Figure 1</figcaption>
+                    <img src="images/sample_transfer_data.png" alt="Sample Transfer Data" class="mt-3">
+                    <figcaption class="mt-3 text-center">First 6 Rows of the Data Used to Train My Model</figcaption>
+                </figure>
+
+                <figure class="mt-5">
+                    <!-- <figcaption class="mb-2 text-center fig-title-right">Figure 1</figcaption> -->
+                    <img src="images/sample_transfer_data_2023.png" alt="Sample Transfer Data 2023">
+                    <figcaption class="mt-3 text-center">First 6 Rows of the Data I Used my Model on to Predict Effective 2022-23 Transfers</figcaption>
+                    <figcaption class="mt-1 text-center">Note: The Post_BPM column will be updated once the 2022-23 season is completed</figcaption>
+
+                </figure>
+            </div>
+        </div>
+
+         <!-- Second row (Method) -->
+         <div class="row align-top mt-5" id="method">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 mt-3 text-center fig-title-left">Figure 2</figcaption>
+                    <img src="images/train-test-diagram.png" alt="Modeling Diagram" class="left-image">
+                    <figcaption class="mt-4 text-center modeling-diagram">Modeling process used on the 2020-21 pre transfer season to predict 2021-22 post transfer BPM</figcaption>
+                </figure>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center text-title-right">Method</h6>
+                <p class="text-right mt-3">Before I could get into the actual modeling, I created two categorical features called “level” and “move”. 
+                    The feature “level” was created to hold information on the level of competition a player was playing at before transferring. 
+                    The categories of level are “high” (Big 10, Big 12, SEC, ACC, Pac 12, Big East), “mid” (WCC, Mountain West, AAC, A10), and “low” 
+                    (the rest of the conferences). I decided to categorize each conference according to how many teams the conference consistently 
+                    sends to the NCAA Tournament. Low major conferences are one bid leagues, while mid major conferences typically send between two and
+                     four teams to the tournament. High major conferences consistently send four or more teams to the tournament. The feature “move” 
+                     takes each player's pre transfer conference and post transfer conference into account and categorizes the change in competition 
+                     as one of the following five options: “2 down”, “down”, “same”, “up”, “2 up”. To provide an example, Justin Ahrens played at 
+                     Michigan State (Big 10) in the 2021-22 season and transferred to Loyola Marymount (WCC) for the 2022-23 season. For Justin's 
+                     case, he would be given the “high” (Big 10) categorization for the “level” feature and a “down” (high to mid) categorization 
+                     for the “move” feature.</p> 
+                <p class="text-right">I used the dataset with player stats from the 2020-21 season to train a model to predict each player's post 
+                    transfer season BPM (2021-22 season in this case). To do this, I performed a randomized 75%/25% train/test split. In other 
+                    words, I randomly took 75% of the data (about 300 players) as a training set, and I trained several different models to 
+                    predict the player's post transfer BPM. These models were able to see the actual post transfer BPM in order to optimize the 
+                    coefficients for each feature. Next, I used the models that I just trained to make predictions on the remaining 25% of the 
+                    data. This remaining test set contained “unseen” data, as the models were not able to see the true post transfer BPM like they 
+                    could with the training set.  This allowed me to evaluate how good the model was by taking the predicted values and seeing 
+                    how close they were to the actual post transfer BPM values. Figure 2 illustrates this process. 
+                </p>
+            </div>
+        </div>
+
+        <!-- Third  row (Data Pre-Processing) -->
+        <div class="row align-top mt-5 mb-5" id="pp">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">Model Pre-Processing</h6>
+                <p class="text-article mt-3">
+                    For these models to be as effective as possible, I needed to perform some pre-processing steps so that my models could 
+                    understand the data. I used Scikit-Learn's “Column Transformer” to make the necessary modifications. For the “level” and “move”
+                    columns I encoded each category as a 1 if that category described the player and 0 otherwise. This led to the creation of eight
+                    new columns: one for each of the three categorizations of “level” and one for each of the five categorizations of “move”. For 
+                    example, Justin Ahrens would have a value of 1 for the columns “high” and “down”, and a value of 0 for the remaining six 
+                    categorization columns. This encoding was necessary because the models can only understand numerical data, and “level” and 
+                    “move” are categorical columns. 
+                </p>
+                <p class="text-article mt-3">
+                    The other preprocessing step I needed to do was to “standardize” the numerical value columns. What this means is that I 
+                    transformed the columns to reflect how much more or less feature values were than their feature average, while taking into 
+                    account the standard deviation. This is important because the scales of each column vary. For example, a player can play 40 
+                    minutes a game (MPG feature) while producing 100 points on the season (PProd feature). In a raw sense, 100 is much larger than 
+                    40; however, compared to the average, 40 minutes per game is well above average, while 100 points produced is well below 
+                    average. Certain kinds of models are not able to account for different scales, so by comparing each feature value to its 
+                    average value (and accounting for each feature's standard deviation), you force all the features onto the same scale. You can 
+                    read <a href="https://en.wikipedia.org/wiki/Standard_score">here</a> for more details on standardization.
+                </p>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 mt-3 text-center fig-title-right">Figure 3</figcaption>
+                    <img src="images/pre-processing.png" alt="Pre-processing Diagram">
+                    <figcaption class="mb-2 mt-3 text-center">Diagram of pre-processing steps needed to model</figcaption>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Fourth row (Model Results)-->
+        <div class="row align-top mt-5 mb-5" id="results">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 mt-3 text-center fig-title-left">Figure 4</figcaption>
+                    <img src="images/feature-importances.png" alt="Feature Importances" class="left-image mt-3 w-75 feature-importances">
+                    <figcaption class="mt-2 text-center">Feature importances of the final feature combination</figcaption>
+                </figure>
+
+                <figure>
+                    <figcaption class="mt-3 text-center fig-title-left">Figure 5</figcaption>
+                    <img src="images/final-model-diagram.png" alt="Feature Importances" class="left-image mt-2 w-80 final-model-diagram">
+                    <figcaption class="mt-2 text-center">Diagram of how to get predicted values using the final model</figcaption>
+                </figure>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center text-title-right">Model Results</h6>
+                <p class="text-right mt-3">After creating the features “level” and “move” and applying the appropriate pre-processing steps to the 
+                    data, I selected which features to use in the models. I performed several rounds of model testing and feature exploration to 
+                    narrow down which features appeared to be the most important. I then explored different combinations of those features and 
+                    examined their impact on model score to get to the final few possibilities. In the end, I decided to use the following 
+                    features for my models: minutes per game, pre transfer BPM, points produced, true shooting percentage, low, mid, high, 2 down, 
+                    down, same, up,  and 2 up. The last eight of those features are the encoded category values of the “level” and “move” features. 
+                    There were some different feature combinations that provided marginal model score improvements that only included “down”, 
+                    “2 down”, and “high” out of the eight encoded features. I decided to include them all despite the very slight decrease in score 
+                    as I believed that including all of them increased the interpretability and made for a more intuitive model. Figure 4 provides a visual of the 
+                    feature importance of the final combination of features that I used for my model. Pre transfer BPM was clearly the most important feature, but 
+                    as I will detail in the next paragraph, adding the other features led to a substantial improvement in model score. Another thing to note is 
+                    that each of the eight encoded features by themselves are not very important, but taking them all together does make an impact on the model.</p> 
+                <p class="text-right">As I mentioned previously, I trained multiple different kinds of models as I wanted to see which one was 
+                    most effective for this data set.  I tested several kinds of regression models such as multiple linear regression and ridge 
+                    regression as well as a couple ensemble methods such as random forest regression and gradient boosting regression. In the end, 
+                    the multiple regression model proved to be the most effective method for modeling this data regardless of what features were 
+                    used. For the final multiple linear regression model I used, I was able to achieve an R-squared value of .406. This means that
+                    my model was able to explain almost 41% of the variation in post transfer BPM. While obviously I would like that percentage to 
+                    be as close to 100% as possible, 41% is quite good considering all the variables at play that are not quantifiable. Factors 
+                    such as moving to a new place, playing in a new system, offseason skill improvement (or decline), and numerous other things 
+                    all contribute to how well a player plays after transferring. Additionally, this model served as a clear improvement over the 
+                    baseline model that I created which only used pre transfer BPM to predict post transfer BPM. This baseline model had an 
+                    R-squared value of .255. My model was able to explain over 15% more of the variation in post transfer BPM than the baseline 
+                    model could. The random forest model also outperformed the baseline model with an R-squared score of .313, but this model was 
+                    not able to produce as effective results as the multiple regression model.
+                </p>
+            </div>
+        </div>
+
+
+        <!-- Fifth row (Table) -->
+        <div class="container-xxl mb-5 mt-5" id="predictions">
+            <div class="row justify-content-center align-items-center">
+                <h6 class="display-6 text-center">Predictions for the 2022-23 Season</h6>
+                <p class="text-center">I applied my final model to the dataset with the 2021-22 pre transfer season data to generate the 2022-23 post transfer predictions.</p>
+                <p class="text-center mb-3">*Players must have played 75% of their teams games in both the 2021-22 and 2022-23 season to be included.*</p>
+                <div class="table-responsive">
+                <!-- table containing data -->
+                    <table class="dataframe table table-togglable" id="main-table">
+                  <thead>
+                    <tr style="text-align: right;">
+                      <th></th>
+                      <th>Position</th>
+                      <th>Name</th>
+                      <th>Previous School</th>
+                      <th>New School</th>
+                      <th>Predicted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th>288</th>
+                      <td>G</td>
+                      <td>Nijel Pack</td>
+                      <td>Kansas State</td>
+                      <td>Miami</td>
+                      <td>7.45</td>
+                    </tr>
+                    <tr>
+                      <th>266</th>
+                      <td>F</td>
+                      <td>Pete Nance</td>
+                      <td>Northwestern</td>
+                      <td>North Carolina</td>
+                      <td>6.87</td>
+                    </tr>
+                    <tr>
+                      <th>233</th>
+                      <td>F</td>
+                      <td>Matthew Mayer</td>
+                      <td>Baylor</td>
+                      <td>Illinois</td>
+                      <td>6.84</td>
+                    </tr>
+                    <tr>
+                      <th>47</th>
+                      <td>F</td>
+                      <td>Johni Broome</td>
+                      <td>Morehead State</td>
+                      <td>Auburn</td>
+                      <td>6.21</td>
+                    </tr>
+                    <tr>
+                      <th>194</th>
+                      <td>F</td>
+                      <td>David Jones</td>
+                      <td>DePaul</td>
+                      <td>St. John's</td>
+                      <td>6.11</td>
+                    </tr>
+                    <tr>
+                      <th>401</th>
+                      <td>C</td>
+                      <td>K.J. Williams</td>
+                      <td>Murray State</td>
+                      <td>LSU</td>
+                      <td>5.97</td>
+                    </tr>
+                    <tr>
+                      <th>129</th>
+                      <td>G</td>
+                      <td>Andersson Garcia</td>
+                      <td>Mississippi State</td>
+                      <td>Texas A&amp;M</td>
+                      <td>5.76</td>
+                    </tr>
+                    <tr>
+                      <th>320</th>
+                      <td>G</td>
+                      <td>Terry Roberts</td>
+                      <td>Bradley</td>
+                      <td>Georgia</td>
+                      <td>5.73</td>
+                    </tr>
+                    <tr>
+                      <th>335</th>
+                      <td>G</td>
+                      <td>Baylor Scheierman</td>
+                      <td>South Dakota State</td>
+                      <td>Creighton</td>
+                      <td>5.72</td>
+                    </tr>
+                    <tr>
+                      <th>177</th>
+                      <td>G</td>
+                      <td>Tyrese Hunter</td>
+                      <td>Iowa State</td>
+                      <td>Texas</td>
+                      <td>5.68</td>
+                    </tr>
+                    <tr>
+                      <th>357</th>
+                      <td>G</td>
+                      <td>Erik Stevenson</td>
+                      <td>South Carolina</td>
+                      <td>West Virginia</td>
+                      <td>5.67</td>
+                    </tr>
+                    <tr>
+                      <th>141</th>
+                      <td>G</td>
+                      <td>Jacob Grandison</td>
+                      <td>Illinois</td>
+                      <td>Duke</td>
+                      <td>5.48</td>
+                    </tr>
+                    <tr>
+                      <th>45</th>
+                      <td>F</td>
+                      <td>Jalen Bridges</td>
+                      <td>West Virginia</td>
+                      <td>Baylor</td>
+                      <td>5.35</td>
+                    </tr>
+                    <tr>
+                      <th>337</th>
+                      <td>G</td>
+                      <td>Mark Sears</td>
+                      <td>Ohio</td>
+                      <td>Alabama</td>
+                      <td>5.35</td>
+                    </tr>
+                    <tr>
+                      <th>41</th>
+                      <td>G</td>
+                      <td>Souley Boum</td>
+                      <td>UTEP</td>
+                      <td>Xavier</td>
+                      <td>5.34</td>
+                    </tr>
+                    <tr>
+                      <th>393</th>
+                      <td>G</td>
+                      <td>Rondel Walker</td>
+                      <td>Oklahoma State</td>
+                      <td>TCU</td>
+                      <td>5.28</td>
+                    </tr>
+                    <tr>
+                      <th>310</th>
+                      <td>G</td>
+                      <td>Courtney Ramey</td>
+                      <td>Texas</td>
+                      <td>Arizona</td>
+                      <td>5.27</td>
+                    </tr>
+                    <tr>
+                      <th>132</th>
+                      <td>G</td>
+                      <td>Umoja Gibson</td>
+                      <td>Oklahoma</td>
+                      <td>DePaul</td>
+                      <td>5.27</td>
+                    </tr>
+                    <tr>
+                      <th>46</th>
+                      <td>F</td>
+                      <td>Keion Brooks</td>
+                      <td>Kentucky</td>
+                      <td>Washington</td>
+                      <td>5.21</td>
+                    </tr>
+                    <tr>
+                      <th>413</th>
+                      <td>G</td>
+                      <td>Jahmir Young</td>
+                      <td>Charlotte</td>
+                      <td>Maryland</td>
+                      <td>5.18</td>
+                    </tr>
+                    <tr>
+                      <th>354</th>
+                      <td>G</td>
+                      <td>Cam Spencer</td>
+                      <td>Loyola (MD)</td>
+                      <td>Rutgers</td>
+                      <td>5.17</td>
+                    </tr>
+                    <tr>
+                      <th>216</th>
+                      <td>G</td>
+                      <td>Isaac Likekele</td>
+                      <td>Oklahoma State</td>
+                      <td>Ohio State</td>
+                      <td>5.16</td>
+                    </tr>
+                    <tr>
+                      <th>282</th>
+                      <td>F</td>
+                      <td>Norchad Omier</td>
+                      <td>Arkansas State</td>
+                      <td>Miami</td>
+                      <td>5.11</td>
+                    </tr>
+                    <tr>
+                      <th>66</th>
+                      <td>F</td>
+                      <td>Noah Carter</td>
+                      <td>Northern Iowa</td>
+                      <td>Missouri</td>
+                      <td>5.01</td>
+                    </tr>
+                    <tr>
+                      <th>240</th>
+                      <td>F</td>
+                      <td>Jayveous McKinnis</td>
+                      <td>Jackson State</td>
+                      <td>Ole Miss</td>
+                      <td>4.92</td>
+                    </tr>
+                    <tr>
+                      <th>102</th>
+                      <td>G</td>
+                      <td>Greg Elliott</td>
+                      <td>Marquette</td>
+                      <td>Pittsburgh</td>
+                      <td>4.83</td>
+                    </tr>
+                    <tr>
+                      <th>386</th>
+                      <td>F</td>
+                      <td>Ben Vander Plas</td>
+                      <td>Ohio</td>
+                      <td>Virginia</td>
+                      <td>4.76</td>
+                    </tr>
+                    <tr>
+                      <th>263</th>
+                      <td>G</td>
+                      <td>Brandon Murray</td>
+                      <td>LSU</td>
+                      <td>Georgetown</td>
+                      <td>4.73</td>
+                    </tr>
+                    <tr>
+                      <th>166</th>
+                      <td>G</td>
+                      <td>D'Moi Hodge</td>
+                      <td>Cleveland State</td>
+                      <td>Missouri</td>
+                      <td>4.71</td>
+                    </tr>
+                    <tr>
+                      <th>284</th>
+                      <td>C</td>
+                      <td>Osun Osunniyi</td>
+                      <td>St. Bonaventure</td>
+                      <td>Iowa State</td>
+                      <td>4.68</td>
+                    </tr>
+                    <tr>
+                      <th>122</th>
+                      <td>F</td>
+                      <td>Alex Fudge</td>
+                      <td>LSU</td>
+                      <td>Florida</td>
+                      <td>4.65</td>
+                    </tr>
+                    <tr>
+                      <th>242</th>
+                      <td>G</td>
+                      <td>Sean McNeil</td>
+                      <td>West Virginia</td>
+                      <td>Ohio State</td>
+                      <td>4.64</td>
+                    </tr>
+                    <tr>
+                      <th>164</th>
+                      <td>G</td>
+                      <td>Justice Hill</td>
+                      <td>Murray State</td>
+                      <td>LSU</td>
+                      <td>4.63</td>
+                    </tr>
+                    <tr>
+                      <th>377</th>
+                      <td>G</td>
+                      <td>Joe Toussaint</td>
+                      <td>Iowa</td>
+                      <td>West Virginia</td>
+                      <td>4.63</td>
+                    </tr>
+                    <tr>
+                      <th>139</th>
+                      <td>F</td>
+                      <td>Jalen Graham</td>
+                      <td>Arizona State</td>
+                      <td>Arkansas</td>
+                      <td>4.59</td>
+                    </tr>
+                    <tr>
+                      <th>65</th>
+                      <td>G</td>
+                      <td>Devin Carter</td>
+                      <td>South Carolina</td>
+                      <td>Providence</td>
+                      <td>4.56</td>
+                    </tr>
+                    <tr>
+                      <th>109</th>
+                      <td>G</td>
+                      <td>Francisco Farabello</td>
+                      <td>TCU</td>
+                      <td>Creighton</td>
+                      <td>4.55</td>
+                    </tr>
+                    <tr>
+                      <th>272</th>
+                      <td>G</td>
+                      <td>Tristen Newton</td>
+                      <td>East Carolina</td>
+                      <td>Connecticut</td>
+                      <td>4.47</td>
+                    </tr>
+                    <tr>
+                      <th>130</th>
+                      <td>F</td>
+                      <td>Juwan Gary</td>
+                      <td>Alabama</td>
+                      <td>Nebraska</td>
+                      <td>4.38</td>
+                    </tr>
+                    <tr>
+                      <th>154</th>
+                      <td>G</td>
+                      <td>De'Vion Harmon</td>
+                      <td>Oregon</td>
+                      <td>Texas Tech</td>
+                      <td>4.38</td>
+                    </tr>
+                    <tr>
+                      <th>307</th>
+                      <td>G</td>
+                      <td>Justin Powell</td>
+                      <td>Tennessee</td>
+                      <td>Washington State</td>
+                      <td>4.34</td>
+                    </tr>
+                    <tr>
+                      <th>19</th>
+                      <td>G</td>
+                      <td>Caleb Asberry</td>
+                      <td>Texas State</td>
+                      <td>Oklahoma State</td>
+                      <td>4.32</td>
+                    </tr>
+                    <tr>
+                      <th>236</th>
+                      <td>G</td>
+                      <td>Mardrez McBride</td>
+                      <td>North Texas</td>
+                      <td>Georgia</td>
+                      <td>4.29</td>
+                    </tr>
+                    <tr>
+                      <th>87</th>
+                      <td>G</td>
+                      <td>Al-Amir Dawes</td>
+                      <td>Clemson</td>
+                      <td>Seton Hall</td>
+                      <td>4.25</td>
+                    </tr>
+                    <tr>
+                      <th>61</th>
+                      <td>G</td>
+                      <td>Devan Cambridge</td>
+                      <td>Auburn</td>
+                      <td>Arizona State</td>
+                      <td>4.23</td>
+                    </tr>
+                    <tr>
+                      <th>18</th>
+                      <td>G</td>
+                      <td>Tyree Appleby</td>
+                      <td>Florida</td>
+                      <td>Wake Forest</td>
+                      <td>4.21</td>
+                    </tr>
+                    <tr>
+                      <th>316</th>
+                      <td>G</td>
+                      <td>Will Richard</td>
+                      <td>Belmont</td>
+                      <td>Florida</td>
+                      <td>4.20</td>
+                    </tr>
+                    <tr>
+                      <th>165</th>
+                      <td>G</td>
+                      <td>Justin Hill</td>
+                      <td>Longwood</td>
+                      <td>Georgia</td>
+                      <td>4.20</td>
+                    </tr>
+                    <tr>
+                      <th>26</th>
+                      <td>F</td>
+                      <td>Grant Basile</td>
+                      <td>Wright State</td>
+                      <td>Virginia Tech</td>
+                      <td>4.19</td>
+                    </tr>
+                    <tr>
+                      <th>152</th>
+                      <td>G</td>
+                      <td>Trae Hannibal</td>
+                      <td>Murray State</td>
+                      <td>LSU</td>
+                      <td>4.16</td>
+                    </tr>
+                    <tr>
+                      <th>379</th>
+                      <td>G</td>
+                      <td>Darrion Trammell</td>
+                      <td>Seattle</td>
+                      <td>San Diego State</td>
+                      <td>4.09</td>
+                    </tr>
+                    <tr>
+                      <th>313</th>
+                      <td>G</td>
+                      <td>Antonio Reeves</td>
+                      <td>Illinois State</td>
+                      <td>Kentucky</td>
+                      <td>4.09</td>
+                    </tr>
+                    <tr>
+                      <th>74</th>
+                      <td>G</td>
+                      <td>Ta'Lon Cooper</td>
+                      <td>Morehead State</td>
+                      <td>Minnesota</td>
+                      <td>4.08</td>
+                    </tr>
+                    <tr>
+                      <th>168</th>
+                      <td>G</td>
+                      <td>Tanner Holden</td>
+                      <td>Wright State</td>
+                      <td>Ohio State</td>
+                      <td>4.08</td>
+                    </tr>
+                    <tr>
+                      <th>85</th>
+                      <td>G</td>
+                      <td>Kendric Davis</td>
+                      <td>SMU</td>
+                      <td>Memphis</td>
+                      <td>4.05</td>
+                    </tr>
+                    <tr>
+                      <th>196</th>
+                      <td>G</td>
+                      <td>Michael Jones</td>
+                      <td>Davidson</td>
+                      <td>Stanford</td>
+                      <td>4.00</td>
+                    </tr>
+                    <tr>
+                      <th>218</th>
+                      <td>G</td>
+                      <td>Kyle Lofton</td>
+                      <td>St. Bonaventure</td>
+                      <td>Florida</td>
+                      <td>3.95</td>
+                    </tr>
+                    <tr>
+                      <th>414</th>
+                      <td>C</td>
+                      <td>Ryan Young</td>
+                      <td>Northwestern</td>
+                      <td>Duke</td>
+                      <td>3.91</td>
+                    </tr>
+                    <tr>
+                      <th>171</th>
+                      <td>G</td>
+                      <td>Nick Honor</td>
+                      <td>Clemson</td>
+                      <td>Missouri</td>
+                      <td>3.78</td>
+                    </tr>
+                    <tr>
+                      <th>10</th>
+                      <td>G</td>
+                      <td>Nahiem Alleyne</td>
+                      <td>Virginia Tech</td>
+                      <td>Connecticut</td>
+                      <td>3.78</td>
+                    </tr>
+                    <tr>
+                      <th>146</th>
+                      <td>G</td>
+                      <td>Sam Griesel</td>
+                      <td>North Dakota State</td>
+                      <td>Nebraska</td>
+                      <td>3.75</td>
+                    </tr>
+                    <tr>
+                      <th>315</th>
+                      <td>G</td>
+                      <td>Sir'Jabari Rice</td>
+                      <td>New Mexico State</td>
+                      <td>Texas</td>
+                      <td>3.74</td>
+                    </tr>
+                    <tr>
+                      <th>298</th>
+                      <td>F</td>
+                      <td>Eral Penn</td>
+                      <td>LIU</td>
+                      <td>DePaul</td>
+                      <td>3.74</td>
+                    </tr>
+                    <tr>
+                      <th>170</th>
+                      <td>G</td>
+                      <td>Jaren Holmes</td>
+                      <td>St. Bonaventure</td>
+                      <td>Iowa State</td>
+                      <td>3.68</td>
+                    </tr>
+                    <tr>
+                      <th>323</th>
+                      <td>G</td>
+                      <td>Luis Rodriguez</td>
+                      <td>Ole Miss</td>
+                      <td>UNLV</td>
+                      <td>3.67</td>
+                    </tr>
+                    <tr>
+                      <th>90</th>
+                      <td>G</td>
+                      <td>Hassan Diarra</td>
+                      <td>Texas A&amp;M</td>
+                      <td>Connecticut</td>
+                      <td>3.66</td>
+                    </tr>
+                    <tr>
+                      <th>261</th>
+                      <td>G</td>
+                      <td>Jabe Mullins</td>
+                      <td>Saint Mary's</td>
+                      <td>Washington State</td>
+                      <td>3.63</td>
+                    </tr>
+                    <tr>
+                      <th>49</th>
+                      <td>F</td>
+                      <td>Hayden Brown</td>
+                      <td>The Citadel</td>
+                      <td>South Carolina</td>
+                      <td>3.61</td>
+                    </tr>
+                    <tr>
+                      <th>321</th>
+                      <td>G</td>
+                      <td>Tyrell Roberts</td>
+                      <td>Washington State</td>
+                      <td>San Francisco</td>
+                      <td>3.57</td>
+                    </tr>
+                    <tr>
+                      <th>397</th>
+                      <td>G</td>
+                      <td>D'maurian Williams</td>
+                      <td>Gardner�Webb</td>
+                      <td>Texas Tech</td>
+                      <td>3.54</td>
+                    </tr>
+                    <tr>
+                      <th>254</th>
+                      <td>F</td>
+                      <td>Clifton Moore</td>
+                      <td>La Salle</td>
+                      <td>Providence</td>
+                      <td>3.53</td>
+                    </tr>
+                    <tr>
+                      <th>89</th>
+                      <td>G</td>
+                      <td>Dexter Dennis</td>
+                      <td>Wichita State</td>
+                      <td>Texas A&amp;M</td>
+                      <td>3.53</td>
+                    </tr>
+                    <tr>
+                      <th>409</th>
+                      <td>G</td>
+                      <td>Ethan Wright</td>
+                      <td>Princeton</td>
+                      <td>Colorado</td>
+                      <td>3.48</td>
+                    </tr>
+                    <tr>
+                      <th>340</th>
+                      <td>G</td>
+                      <td>Grant Sherfield</td>
+                      <td>Nevada</td>
+                      <td>Oklahoma</td>
+                      <td>3.45</td>
+                    </tr>
+                    <tr>
+                      <th>366</th>
+                      <td>G</td>
+                      <td>Lance Terry</td>
+                      <td>Gardner�Webb</td>
+                      <td>Georgia Tech</td>
+                      <td>3.41</td>
+                    </tr>
+                    <tr>
+                      <th>412</th>
+                      <td>G</td>
+                      <td>Camren Wynter</td>
+                      <td>Drexel</td>
+                      <td>Penn State</td>
+                      <td>3.40</td>
+                    </tr>
+                    <tr>
+                      <th>217</th>
+                      <td>G</td>
+                      <td>Noah Locke</td>
+                      <td>Louisville</td>
+                      <td>Providence</td>
+                      <td>3.38</td>
+                    </tr>
+                    <tr>
+                      <th>395</th>
+                      <td>F</td>
+                      <td>Hason Ward</td>
+                      <td>VCU</td>
+                      <td>Iowa State</td>
+                      <td>3.34</td>
+                    </tr>
+                    <tr>
+                      <th>391</th>
+                      <td>C</td>
+                      <td>Qudus Wahab</td>
+                      <td>Maryland</td>
+                      <td>Georgetown</td>
+                      <td>3.33</td>
+                    </tr>
+                    <tr>
+                      <th>410</th>
+                      <td>G</td>
+                      <td>John-Michael Wright</td>
+                      <td>High Point</td>
+                      <td>Oklahoma State</td>
+                      <td>3.33</td>
+                    </tr>
+                    <tr>
+                      <th>145</th>
+                      <td>G</td>
+                      <td>Tykei Greene</td>
+                      <td>Stony Brook</td>
+                      <td>Kansas State</td>
+                      <td>3.32</td>
+                    </tr>
+                    <tr>
+                      <th>210</th>
+                      <td>G</td>
+                      <td>Max Klesmit</td>
+                      <td>Wofford</td>
+                      <td>Wisconsin</td>
+                      <td>3.30</td>
+                    </tr>
+                    <tr>
+                      <th>84</th>
+                      <td>G</td>
+                      <td>Dre Davis</td>
+                      <td>Louisville</td>
+                      <td>Seton Hall</td>
+                      <td>3.29</td>
+                    </tr>
+                    <tr>
+                      <th>83</th>
+                      <td>G</td>
+                      <td>Dashawn Davis</td>
+                      <td>Oregon State</td>
+                      <td>Mississippi State</td>
+                      <td>3.29</td>
+                    </tr>
+                    <tr>
+                      <th>24</th>
+                      <td>G</td>
+                      <td>Emmanuel Bandoumel</td>
+                      <td>SMU</td>
+                      <td>Nebraska</td>
+                      <td>3.19</td>
+                    </tr>
+                    <tr>
+                      <th>8</th>
+                      <td>C</td>
+                      <td>Theo Akwuba</td>
+                      <td>Louisiana</td>
+                      <td>Ole Miss</td>
+                      <td>3.18</td>
+                    </tr>
+                    <tr>
+                      <th>128</th>
+                      <td>G</td>
+                      <td>Brevin Galloway</td>
+                      <td>Boston College</td>
+                      <td>Clemson</td>
+                      <td>3.12</td>
+                    </tr>
+                    <tr>
+                      <th>127</th>
+                      <td>G</td>
+                      <td>Eric Gaines</td>
+                      <td>LSU</td>
+                      <td>UAB</td>
+                      <td>3.10</td>
+                    </tr>
+                    <tr>
+                      <th>277</th>
+                      <td>G</td>
+                      <td>Femi Odukale</td>
+                      <td>Pittsburgh</td>
+                      <td>Seton Hall</td>
+                      <td>3.06</td>
+                    </tr>
+                    <tr>
+                      <th>172</th>
+                      <td>F</td>
+                      <td>Bryce Hopkins</td>
+                      <td>Kentucky</td>
+                      <td>Providence</td>
+                      <td>3.06</td>
+                    </tr>
+                    <tr>
+                      <th>252</th>
+                      <td>F</td>
+                      <td>Matthew-Alexander Moncrieffe</td>
+                      <td>Oklahoma State</td>
+                      <td>Georgia</td>
+                      <td>3.04</td>
+                    </tr>
+                    <tr>
+                      <th>14</th>
+                      <td>G</td>
+                      <td>Ethan Anderson</td>
+                      <td>USC</td>
+                      <td>Wyoming</td>
+                      <td>3.01</td>
+                    </tr>
+                    <tr>
+                      <th>215</th>
+                      <td>F</td>
+                      <td>Wildens Leveque</td>
+                      <td>South Carolina</td>
+                      <td>Massachusetts</td>
+                      <td>3.00</td>
+                    </tr>
+                    <tr>
+                      <th>73</th>
+                      <td>G</td>
+                      <td>Frankie Collins</td>
+                      <td>Michigan</td>
+                      <td>Arizona State</td>
+                      <td>2.98</td>
+                    </tr>
+                    <tr>
+                      <th>402</th>
+                      <td>G</td>
+                      <td>Rudi Williams</td>
+                      <td>Coastal Carolina</td>
+                      <td>Brigham Young</td>
+                      <td>2.95</td>
+                    </tr>
+                    <tr>
+                      <th>356</th>
+                      <td>C</td>
+                      <td>Jake Stephens</td>
+                      <td>VMI</td>
+                      <td>Chattanooga</td>
+                      <td>2.89</td>
+                    </tr>
+                    <tr>
+                      <th>64</th>
+                      <td>F</td>
+                      <td>Andrew Carr</td>
+                      <td>Delaware</td>
+                      <td>Wake Forest</td>
+                      <td>2.85</td>
+                    </tr>
+                    <tr>
+                      <th>178</th>
+                      <td>F</td>
+                      <td>Brandon Huntley-Hatfield</td>
+                      <td>Tennessee</td>
+                      <td>Louisville</td>
+                      <td>2.84</td>
+                    </tr>
+                    <tr>
+                      <th>342</th>
+                      <td>G</td>
+                      <td>Desi Sills</td>
+                      <td>Arkansas State</td>
+                      <td>Kansas State</td>
+                      <td>2.84</td>
+                    </tr>
+                    <tr>
+                      <th>63</th>
+                      <td>F</td>
+                      <td>Ben Carlson</td>
+                      <td>Wisconsin</td>
+                      <td>Utah</td>
+                      <td>2.84</td>
+                    </tr>
+                    <tr>
+                      <th>229</th>
+                      <td>F</td>
+                      <td>Julius Marble</td>
+                      <td>Michigan State</td>
+                      <td>Texas A&amp;M</td>
+                      <td>2.79</td>
+                    </tr>
+                    <tr>
+                      <th>223</th>
+                      <td>G</td>
+                      <td>Mason Madsen</td>
+                      <td>Cincinnati</td>
+                      <td>Boston College</td>
+                      <td>2.78</td>
+                    </tr>
+                    <tr>
+                      <th>71</th>
+                      <td>C</td>
+                      <td>Kendal Coleman</td>
+                      <td>Northwestern State</td>
+                      <td>LSU</td>
+                      <td>2.78</td>
+                    </tr>
+                    <tr>
+                      <th>173</th>
+                      <td>G</td>
+                      <td>Jamel Horton</td>
+                      <td>Albany</td>
+                      <td>Mississippi State</td>
+                      <td>2.75</td>
+                    </tr>
+                    <tr>
+                      <th>40</th>
+                      <td>G</td>
+                      <td>Trey Bonham</td>
+                      <td>VMI</td>
+                      <td>Florida</td>
+                      <td>2.74</td>
+                    </tr>
+                    <tr>
+                      <th>21</th>
+                      <td>F</td>
+                      <td>Joey Baker</td>
+                      <td>Duke</td>
+                      <td>Michigan</td>
+                      <td>2.74</td>
+                    </tr>
+                    <tr>
+                      <th>249</th>
+                      <td>F</td>
+                      <td>Makhi Mitchell</td>
+                      <td>Rhode Island</td>
+                      <td>Arkansas</td>
+                      <td>2.67</td>
+                    </tr>
+                    <tr>
+                      <th>221</th>
+                      <td>G</td>
+                      <td>Jarod Lucas</td>
+                      <td>Oregon State</td>
+                      <td>Nevada</td>
+                      <td>2.65</td>
+                    </tr>
+                    <tr>
+                      <th>226</th>
+                      <td>G</td>
+                      <td>Ezra Manjon</td>
+                      <td>UC Davis</td>
+                      <td>Vanderbilt</td>
+                      <td>2.60</td>
+                    </tr>
+                    <tr>
+                      <th>69</th>
+                      <td>G</td>
+                      <td>Jack Clark</td>
+                      <td>La Salle</td>
+                      <td>NC State</td>
+                      <td>2.56</td>
+                    </tr>
+                    <tr>
+                      <th>137</th>
+                      <td>G</td>
+                      <td>Tre Gomillion</td>
+                      <td>Cleveland State</td>
+                      <td>Missouri</td>
+                      <td>2.55</td>
+                    </tr>
+                    <tr>
+                      <th>57</th>
+                      <td>C</td>
+                      <td>D.J. Burns</td>
+                      <td>Winthrop</td>
+                      <td>NC State</td>
+                      <td>2.54</td>
+                    </tr>
+                    <tr>
+                      <th>394</th>
+                      <td>F</td>
+                      <td>Kerwin Walton</td>
+                      <td>North Carolina</td>
+                      <td>Texas Tech</td>
+                      <td>2.53</td>
+                    </tr>
+                    <tr>
+                      <th>125</th>
+                      <td>F</td>
+                      <td>Taylor Funk</td>
+                      <td>Saint Joseph's</td>
+                      <td>Utah State</td>
+                      <td>2.48</td>
+                    </tr>
+                    <tr>
+                      <th>234</th>
+                      <td>F</td>
+                      <td>Josh Mballa</td>
+                      <td>Buffalo</td>
+                      <td>Ole Miss</td>
+                      <td>2.48</td>
+                    </tr>
+                    <tr>
+                      <th>259</th>
+                      <td>F</td>
+                      <td>Bryson Mozone</td>
+                      <td>USC Upstate</td>
+                      <td>Georgetown</td>
+                      <td>2.45</td>
+                    </tr>
+                    <tr>
+                      <th>308</th>
+                      <td>C</td>
+                      <td>Neal Quinn</td>
+                      <td>Lafayette</td>
+                      <td>Richmond</td>
+                      <td>2.45</td>
+                    </tr>
+                    <tr>
+                      <th>101</th>
+                      <td>G</td>
+                      <td>Sheldon Edwards</td>
+                      <td>Valparaiso</td>
+                      <td>Loyola Chicago</td>
+                      <td>2.44</td>
+                    </tr>
+                    <tr>
+                      <th>246</th>
+                      <td>G</td>
+                      <td>Selton Miguel</td>
+                      <td>Kansas State</td>
+                      <td>South Florida</td>
+                      <td>2.42</td>
+                    </tr>
+                    <tr>
+                      <th>159</th>
+                      <td>G</td>
+                      <td>Cam Hayes</td>
+                      <td>NC State</td>
+                      <td>LSU</td>
+                      <td>2.35</td>
+                    </tr>
+                    <tr>
+                      <th>77</th>
+                      <td>F</td>
+                      <td>Matt Cross</td>
+                      <td>Louisville</td>
+                      <td>Massachusetts</td>
+                      <td>2.32</td>
+                    </tr>
+                    <tr>
+                      <th>399</th>
+                      <td>G</td>
+                      <td>Donovan Williams</td>
+                      <td>Oklahoma State</td>
+                      <td>Pacific</td>
+                      <td>2.30</td>
+                    </tr>
+                    <tr>
+                      <th>136</th>
+                      <td>F</td>
+                      <td>Bryce Golden</td>
+                      <td>Butler</td>
+                      <td>Loyola Chicago</td>
+                      <td>2.29</td>
+                    </tr>
+                    <tr>
+                      <th>302</th>
+                      <td>G</td>
+                      <td>Javon Pickett</td>
+                      <td>Missouri</td>
+                      <td>Saint Louis</td>
+                      <td>2.27</td>
+                    </tr>
+                    <tr>
+                      <th>4</th>
+                      <td>F</td>
+                      <td>Justin Ahrens</td>
+                      <td>Ohio State</td>
+                      <td>Loyola Marymount</td>
+                      <td>2.25</td>
+                    </tr>
+                    <tr>
+                      <th>303</th>
+                      <td>G</td>
+                      <td>Xavier Pinson</td>
+                      <td>LSU</td>
+                      <td>New Mexico State</td>
+                      <td>2.23</td>
+                    </tr>
+                    <tr>
+                      <th>404</th>
+                      <td>F</td>
+                      <td>Samuell Williamson</td>
+                      <td>Louisville</td>
+                      <td>SMU</td>
+                      <td>2.21</td>
+                    </tr>
+                    <tr>
+                      <th>142</th>
+                      <td>G</td>
+                      <td>Dae Dae Grant</td>
+                      <td>Miami (OH)</td>
+                      <td>Duquesne</td>
+                      <td>2.18</td>
+                    </tr>
+                    <tr>
+                      <th>219</th>
+                      <td>F</td>
+                      <td>Caleb Lohner</td>
+                      <td>Brigham Young</td>
+                      <td>Baylor</td>
+                      <td>2.15</td>
+                    </tr>
+                    <tr>
+                      <th>358</th>
+                      <td>F</td>
+                      <td>Tyler Stevenson</td>
+                      <td>Southern Miss</td>
+                      <td>UIC</td>
+                      <td>2.12</td>
+                    </tr>
+                    <tr>
+                      <th>230</th>
+                      <td>F</td>
+                      <td>Brandon Martin</td>
+                      <td>South Carolina</td>
+                      <td>Massachusetts</td>
+                      <td>2.06</td>
+                    </tr>
+                    <tr>
+                      <th>16</th>
+                      <td>C</td>
+                      <td>Frank Anselem</td>
+                      <td>Syracuse</td>
+                      <td>Georgia</td>
+                      <td>2.04</td>
+                    </tr>
+                    <tr>
+                      <th>227</th>
+                      <td>G</td>
+                      <td>Jamaine Mann</td>
+                      <td>Vanderbilt</td>
+                      <td>Georgia State</td>
+                      <td>1.94</td>
+                    </tr>
+                    <tr>
+                      <th>124</th>
+                      <td>G</td>
+                      <td>Andrew Funk</td>
+                      <td>Bucknell</td>
+                      <td>Penn State</td>
+                      <td>1.89</td>
+                    </tr>
+                    <tr>
+                      <th>389</th>
+                      <td>F</td>
+                      <td>Tydus Verhoeven</td>
+                      <td>UTEP</td>
+                      <td>Northwestern</td>
+                      <td>1.85</td>
+                    </tr>
+                    <tr>
+                      <th>79</th>
+                      <td>G</td>
+                      <td>Nelly Cummings</td>
+                      <td>Colgate</td>
+                      <td>Pittsburgh</td>
+                      <td>1.76</td>
+                    </tr>
+                    <tr>
+                      <th>339</th>
+                      <td>G</td>
+                      <td>Sam Sessoms</td>
+                      <td>Penn State</td>
+                      <td>Coppin State</td>
+                      <td>1.73</td>
+                    </tr>
+                    <tr>
+                      <th>140</th>
+                      <td>F</td>
+                      <td>Michael Graham</td>
+                      <td>Elon</td>
+                      <td>Loyola Marymount</td>
+                      <td>1.66</td>
+                    </tr>
+                    <tr>
+                      <th>238</th>
+                      <td>G</td>
+                      <td>Courvoisier McCauley</td>
+                      <td>DePaul</td>
+                      <td>Indiana State</td>
+                      <td>1.64</td>
+                    </tr>
+                    <tr>
+                      <th>131</th>
+                      <td>G</td>
+                      <td>DeAndre Gholston</td>
+                      <td>Milwaukee</td>
+                      <td>Missouri</td>
+                      <td>1.63</td>
+                    </tr>
+                    <tr>
+                      <th>257</th>
+                      <td>F</td>
+                      <td>Khalid Moore</td>
+                      <td>Georgia Tech</td>
+                      <td>Fordham</td>
+                      <td>1.51</td>
+                    </tr>
+                    <tr>
+                      <th>17</th>
+                      <td>F</td>
+                      <td>Emmanuel Ansong</td>
+                      <td>Green Bay</td>
+                      <td>Vanderbilt</td>
+                      <td>1.48</td>
+                    </tr>
+                    <tr>
+                      <th>331</th>
+                      <td>G</td>
+                      <td>Taurus Samuels</td>
+                      <td>Dartmouth</td>
+                      <td>Minnesota</td>
+                      <td>1.48</td>
+                    </tr>
+                    <tr>
+                      <th>44</th>
+                      <td>G</td>
+                      <td>Tevin Brewer</td>
+                      <td>Florida International</td>
+                      <td>Duquesne</td>
+                      <td>1.43</td>
+                    </tr>
+                    <tr>
+                      <th>97</th>
+                      <td>C</td>
+                      <td>Michael Durr</td>
+                      <td>Indiana</td>
+                      <td>UCF</td>
+                      <td>1.41</td>
+                    </tr>
+                    <tr>
+                      <th>104</th>
+                      <td>F</td>
+                      <td>Tristan Enaruna</td>
+                      <td>Iowa State</td>
+                      <td>Cleveland State</td>
+                      <td>1.40</td>
+                    </tr>
+                    <tr>
+                      <th>255</th>
+                      <td>F</td>
+                      <td>Isaih Moore</td>
+                      <td>Southern Miss</td>
+                      <td>Fresno State</td>
+                      <td>1.36</td>
+                    </tr>
+                    <tr>
+                      <th>96</th>
+                      <td>F</td>
+                      <td>Hassan Drame</td>
+                      <td>Saint Peter's</td>
+                      <td>La Salle</td>
+                      <td>1.33</td>
+                    </tr>
+                    <tr>
+                      <th>135</th>
+                      <td>F</td>
+                      <td>Sam Godwin</td>
+                      <td>Wofford</td>
+                      <td>Oklahoma</td>
+                      <td>1.33</td>
+                    </tr>
+                    <tr>
+                      <th>169</th>
+                      <td>F</td>
+                      <td>Collin Holloway</td>
+                      <td>Georgetown</td>
+                      <td>Tulane</td>
+                      <td>1.32</td>
+                    </tr>
+                    <tr>
+                      <th>211</th>
+                      <td>G</td>
+                      <td>Seneca Knight</td>
+                      <td>Brigham Young</td>
+                      <td>Illinois State</td>
+                      <td>1.30</td>
+                    </tr>
+                    <tr>
+                      <th>361</th>
+                      <td>G</td>
+                      <td>Tai Strickland</td>
+                      <td>Temple</td>
+                      <td>Georgia Southern</td>
+                      <td>1.26</td>
+                    </tr>
+                    <tr>
+                      <th>181</th>
+                      <td>G</td>
+                      <td>Tre Jackson</td>
+                      <td>Iowa State</td>
+                      <td>Western Carolina</td>
+                      <td>1.26</td>
+                    </tr>
+                    <tr>
+                      <th>276</th>
+                      <td>G</td>
+                      <td>Dwon Odom</td>
+                      <td>Xavier</td>
+                      <td>Georgia State</td>
+                      <td>1.22</td>
+                    </tr>
+                    <tr>
+                      <th>42</th>
+                      <td>C</td>
+                      <td>Davion Bradford</td>
+                      <td>Kansas State</td>
+                      <td>Wake Forest</td>
+                      <td>1.21</td>
+                    </tr>
+                    <tr>
+                      <th>59</th>
+                      <td>G</td>
+                      <td>Joey Calcaterra</td>
+                      <td>San Diego</td>
+                      <td>Connecticut</td>
+                      <td>1.19</td>
+                    </tr>
+                    <tr>
+                      <th>143</th>
+                      <td>G</td>
+                      <td>Qua Grant</td>
+                      <td>Wichita State</td>
+                      <td>Sam Houston State</td>
+                      <td>1.17</td>
+                    </tr>
+                    <tr>
+                      <th>126</th>
+                      <td>G</td>
+                      <td>Jalen Gaffney</td>
+                      <td>Connecticut</td>
+                      <td>Florida Atlantic</td>
+                      <td>1.16</td>
+                    </tr>
+                    <tr>
+                      <th>291</th>
+                      <td>F</td>
+                      <td>Micah Parrish</td>
+                      <td>Oakland</td>
+                      <td>San Diego State</td>
+                      <td>1.04</td>
+                    </tr>
+                    <tr>
+                      <th>363</th>
+                      <td>F</td>
+                      <td>Brandon Suggs</td>
+                      <td>East Carolina</td>
+                      <td>UCF</td>
+                      <td>1.02</td>
+                    </tr>
+                    <tr>
+                      <th>133</th>
+                      <td>G</td>
+                      <td>Montre' Gipson</td>
+                      <td>Tarleton State</td>
+                      <td>Charlotte</td>
+                      <td>0.99</td>
+                    </tr>
+                    <tr>
+                      <th>148</th>
+                      <td>F</td>
+                      <td>Felipe Haase</td>
+                      <td>Mercer</td>
+                      <td>Southern Miss</td>
+                      <td>0.99</td>
+                    </tr>
+                    <tr>
+                      <th>368</th>
+                      <td>F</td>
+                      <td>Dischon Thomas</td>
+                      <td>Colorado State</td>
+                      <td>Montana</td>
+                      <td>0.94</td>
+                    </tr>
+                    <tr>
+                      <th>7</th>
+                      <td>G</td>
+                      <td>Emmanuel Akot</td>
+                      <td>Boise State</td>
+                      <td>Western Kentucky</td>
+                      <td>0.93</td>
+                    </tr>
+                    <tr>
+                      <th>301</th>
+                      <td>G</td>
+                      <td>Nelson Phillips</td>
+                      <td>Georgia State</td>
+                      <td>Troy</td>
+                      <td>0.89</td>
+                    </tr>
+                    <tr>
+                      <th>305</th>
+                      <td>C</td>
+                      <td>Mylyjael Poteat</td>
+                      <td>Rice</td>
+                      <td>Virginia Tech</td>
+                      <td>0.89</td>
+                    </tr>
+                    <tr>
+                      <th>103</th>
+                      <td>F</td>
+                      <td>Patrick Emilien</td>
+                      <td>St. Francis Brooklyn</td>
+                      <td>Maryland</td>
+                      <td>0.88</td>
+                    </tr>
+                    <tr>
+                      <th>27</th>
+                      <td>F</td>
+                      <td>Riley Battin</td>
+                      <td>Utah</td>
+                      <td>California Baptist</td>
+                      <td>0.87</td>
+                    </tr>
+                    <tr>
+                      <th>270</th>
+                      <td>G</td>
+                      <td>Jordan Nesbitt</td>
+                      <td>Saint Louis</td>
+                      <td>Hampton</td>
+                      <td>0.75</td>
+                    </tr>
+                    <tr>
+                      <th>28</th>
+                      <td>F</td>
+                      <td>Noah Baumann</td>
+                      <td>Georgia</td>
+                      <td>GCU</td>
+                      <td>0.74</td>
+                    </tr>
+                    <tr>
+                      <th>367</th>
+                      <td>C</td>
+                      <td>Lahat Thioune</td>
+                      <td>Utah</td>
+                      <td>UCF</td>
+                      <td>0.73</td>
+                    </tr>
+                    <tr>
+                      <th>95</th>
+                      <td>F</td>
+                      <td>Fousseyni Drame</td>
+                      <td>Saint Peter's</td>
+                      <td>La Salle</td>
+                      <td>0.73</td>
+                    </tr>
+                    <tr>
+                      <th>375</th>
+                      <td>G</td>
+                      <td>Earl Timberlake</td>
+                      <td>Memphis</td>
+                      <td>Bryant</td>
+                      <td>0.70</td>
+                    </tr>
+                    <tr>
+                      <th>359</th>
+                      <td>G</td>
+                      <td>Parker Stewart</td>
+                      <td>Indiana</td>
+                      <td>UT Martin</td>
+                      <td>0.66</td>
+                    </tr>
+                    <tr>
+                      <th>347</th>
+                      <td>C</td>
+                      <td>David Skogman</td>
+                      <td>Buffalo</td>
+                      <td>Davidson</td>
+                      <td>0.65</td>
+                    </tr>
+                    <tr>
+                      <th>110</th>
+                      <td>G</td>
+                      <td>Nick Farrar</td>
+                      <td>College of Charleston</td>
+                      <td>UNCW</td>
+                      <td>0.65</td>
+                    </tr>
+                    <tr>
+                      <th>256</th>
+                      <td>G</td>
+                      <td>Kendle Moore</td>
+                      <td>Colorado State</td>
+                      <td>Missouri State</td>
+                      <td>0.65</td>
+                    </tr>
+                    <tr>
+                      <th>311</th>
+                      <td>F</td>
+                      <td>Ahmad Rand</td>
+                      <td>Oregon State</td>
+                      <td>Milwaukee</td>
+                      <td>0.65</td>
+                    </tr>
+                    <tr>
+                      <th>239</th>
+                      <td>G</td>
+                      <td>Kamari McGee</td>
+                      <td>Green Bay</td>
+                      <td>Wisconsin</td>
+                      <td>0.64</td>
+                    </tr>
+                    <tr>
+                      <th>15</th>
+                      <td>C</td>
+                      <td>Eduardo Andre</td>
+                      <td>Nebraska</td>
+                      <td>Fresno State</td>
+                      <td>0.61</td>
+                    </tr>
+                    <tr>
+                      <th>317</th>
+                      <td>F</td>
+                      <td>Dalen Ridgnal</td>
+                      <td>Georgia</td>
+                      <td>Missouri State</td>
+                      <td>0.60</td>
+                    </tr>
+                    <tr>
+                      <th>353</th>
+                      <td>F</td>
+                      <td>Calvin Solomon</td>
+                      <td>Stephen F. Austin</td>
+                      <td>UTEP</td>
+                      <td>0.60</td>
+                    </tr>
+                    <tr>
+                      <th>5</th>
+                      <td>F</td>
+                      <td>Daniel Akin</td>
+                      <td>California Baptist</td>
+                      <td>Utah State</td>
+                      <td>0.58</td>
+                    </tr>
+                    <tr>
+                      <th>78</th>
+                      <td>G</td>
+                      <td>Austin Crowley</td>
+                      <td>Ole Miss</td>
+                      <td>Southern Miss</td>
+                      <td>0.57</td>
+                    </tr>
+                    <tr>
+                      <th>182</th>
+                      <td>F</td>
+                      <td>Austin Johnson</td>
+                      <td>UC Irvine</td>
+                      <td>North Carolina A&amp;T</td>
+                      <td>0.57</td>
+                    </tr>
+                    <tr>
+                      <th>116</th>
+                      <td>G</td>
+                      <td>Moses Flowers</td>
+                      <td>Hartford</td>
+                      <td>St. Bonaventure</td>
+                      <td>0.56</td>
+                    </tr>
+                    <tr>
+                      <th>373</th>
+                      <td>G</td>
+                      <td>Isaiah Thompson</td>
+                      <td>Purdue</td>
+                      <td>Florida Gulf Coast</td>
+                      <td>0.55</td>
+                    </tr>
+                    <tr>
+                      <th>144</th>
+                      <td>F</td>
+                      <td>Malek Green</td>
+                      <td>Canisius</td>
+                      <td>Youngstown State</td>
+                      <td>0.55</td>
+                    </tr>
+                    <tr>
+                      <th>39</th>
+                      <td>F</td>
+                      <td>Nelson Boachie-Yiadom</td>
+                      <td>Davidson</td>
+                      <td>Hofstra</td>
+                      <td>0.52</td>
+                    </tr>
+                    <tr>
+                      <th>108</th>
+                      <td>F</td>
+                      <td>Tra'Von Fagan</td>
+                      <td>Buffalo</td>
+                      <td>UMBC</td>
+                      <td>0.51</td>
+                    </tr>
+                    <tr>
+                      <th>275</th>
+                      <td>F</td>
+                      <td>Efe Odigie</td>
+                      <td>Troy</td>
+                      <td>SMU</td>
+                      <td>0.50</td>
+                    </tr>
+                    <tr>
+                      <th>328</th>
+                      <td>G</td>
+                      <td>Jayden Saddler</td>
+                      <td>Southern</td>
+                      <td>Saint Peter's</td>
+                      <td>0.49</td>
+                    </tr>
+                    <tr>
+                      <th>279</th>
+                      <td>F</td>
+                      <td>Gus Okafor</td>
+                      <td>Southeastern Louisiana</td>
+                      <td>Wichita State</td>
+                      <td>0.48</td>
+                    </tr>
+                    <tr>
+                      <th>99</th>
+                      <td>G</td>
+                      <td>Doug Edert</td>
+                      <td>Saint Peter's</td>
+                      <td>Bryant</td>
+                      <td>0.46</td>
+                    </tr>
+                    <tr>
+                      <th>34</th>
+                      <td>G</td>
+                      <td>Isaiah Bigelow</td>
+                      <td>Wofford</td>
+                      <td>Richmond</td>
+                      <td>0.41</td>
+                    </tr>
+                    <tr>
+                      <th>53</th>
+                      <td>F</td>
+                      <td>Mikeal Brown-Jones</td>
+                      <td>VCU</td>
+                      <td>UNCG</td>
+                      <td>0.40</td>
+                    </tr>
+                    <tr>
+                      <th>70</th>
+                      <td>G</td>
+                      <td>Jarron Coleman</td>
+                      <td>Missouri</td>
+                      <td>Ball State</td>
+                      <td>0.35</td>
+                    </tr>
+                    <tr>
+                      <th>202</th>
+                      <td>G</td>
+                      <td>Luke Kasubke</td>
+                      <td>Kansas State</td>
+                      <td>Illinois State</td>
+                      <td>0.33</td>
+                    </tr>
+                    <tr>
+                      <th>381</th>
+                      <td>G</td>
+                      <td>Marcus Tsohonis</td>
+                      <td>VCU</td>
+                      <td>Long Beach State</td>
+                      <td>0.32</td>
+                    </tr>
+                    <tr>
+                      <th>289</th>
+                      <td>F</td>
+                      <td>Jay Pal</td>
+                      <td>Jacksonville State</td>
+                      <td>Campbell</td>
+                      <td>0.32</td>
+                    </tr>
+                    <tr>
+                      <th>392</th>
+                      <td>F</td>
+                      <td>Antwan Walker</td>
+                      <td>Rhode Island</td>
+                      <td>Bryant</td>
+                      <td>0.30</td>
+                    </tr>
+                    <tr>
+                      <th>344</th>
+                      <td>G</td>
+                      <td>Saquan Singleton</td>
+                      <td>New Mexico</td>
+                      <td>George Mason</td>
+                      <td>0.30</td>
+                    </tr>
+                    <tr>
+                      <th>243</th>
+                      <td>C</td>
+                      <td>Callum McRae</td>
+                      <td>UC Riverside</td>
+                      <td>Sacramento State</td>
+                      <td>0.22</td>
+                    </tr>
+                    <tr>
+                      <th>309</th>
+                      <td>G</td>
+                      <td>Joe Quintana</td>
+                      <td>Loyola Marymount</td>
+                      <td>California Baptist</td>
+                      <td>0.20</td>
+                    </tr>
+                    <tr>
+                      <th>55</th>
+                      <td>G</td>
+                      <td>Darius Burford</td>
+                      <td>Elon</td>
+                      <td>Illinois State</td>
+                      <td>0.18</td>
+                    </tr>
+                    <tr>
+                      <th>385</th>
+                      <td>F</td>
+                      <td>Morris Udeze</td>
+                      <td>Wichita State</td>
+                      <td>New Mexico</td>
+                      <td>0.17</td>
+                    </tr>
+                    <tr>
+                      <th>81</th>
+                      <td>G</td>
+                      <td>Amari Davis</td>
+                      <td>Missouri</td>
+                      <td>Wright State</td>
+                      <td>0.16</td>
+                    </tr>
+                    <tr>
+                      <th>175</th>
+                      <td>G</td>
+                      <td>Jaylin Hunter</td>
+                      <td>Old Dominion</td>
+                      <td>Ohio</td>
+                      <td>0.15</td>
+                    </tr>
+                    <tr>
+                      <th>29</th>
+                      <td>G</td>
+                      <td>Tyler Beard</td>
+                      <td>Georgetown</td>
+                      <td>Pacific</td>
+                      <td>0.10</td>
+                    </tr>
+                    <tr>
+                      <th>180</th>
+                      <td>F</td>
+                      <td>Clarence Jackson</td>
+                      <td>Wichita State</td>
+                      <td>Jacksonville State</td>
+                      <td>0.09</td>
+                    </tr>
+                    <tr>
+                      <th>157</th>
+                      <td>G</td>
+                      <td>Rayshon Harrison</td>
+                      <td>Presbyterian</td>
+                      <td>GCU</td>
+                      <td>0.08</td>
+                    </tr>
+                    <tr>
+                      <th>411</th>
+                      <td>G</td>
+                      <td>Ricardo Wright</td>
+                      <td>Marist</td>
+                      <td>SMU</td>
+                      <td>0.08</td>
+                    </tr>
+                    <tr>
+                      <th>297</th>
+                      <td>G</td>
+                      <td>Dylan Penn</td>
+                      <td>Bellarmine</td>
+                      <td>Vermont</td>
+                      <td>0.05</td>
+                    </tr>
+                    <tr>
+                      <th>119</th>
+                      <td>G</td>
+                      <td>Brayon Freeman</td>
+                      <td>George Washington</td>
+                      <td>Rhode Island</td>
+                      <td>0.02</td>
+                    </tr>
+                    <tr>
+                      <th>330</th>
+                      <td>C</td>
+                      <td>Kevin Samuel</td>
+                      <td>Florida Gulf Coast</td>
+                      <td>South Alabama</td>
+                      <td>-0.01</td>
+                    </tr>
+                    <tr>
+                      <th>304</th>
+                      <td>F</td>
+                      <td>Joe Pleasant</td>
+                      <td>Wichita State</td>
+                      <td>Abilene Christian</td>
+                      <td>-0.03</td>
+                    </tr>
+                    <tr>
+                      <th>212</th>
+                      <td>G</td>
+                      <td>Connor Kochera</td>
+                      <td>William &amp; Mary</td>
+                      <td>Davidson</td>
+                      <td>-0.06</td>
+                    </tr>
+                    <tr>
+                      <th>204</th>
+                      <td>G</td>
+                      <td>C.J. Kelly</td>
+                      <td>Massachusetts</td>
+                      <td>UCF</td>
+                      <td>-0.06</td>
+                    </tr>
+                    <tr>
+                      <th>295</th>
+                      <td>F</td>
+                      <td>Omar Payne</td>
+                      <td>Illinois</td>
+                      <td>Jacksonville</td>
+                      <td>-0.08</td>
+                    </tr>
+                    <tr>
+                      <th>151</th>
+                      <td>G</td>
+                      <td>Trendon Hankerson</td>
+                      <td>Northern Illinois</td>
+                      <td>Akron</td>
+                      <td>-0.15</td>
+                    </tr>
+                    <tr>
+                      <th>6</th>
+                      <td>F</td>
+                      <td>Kaodirichi Akobundu-Ehiogu</td>
+                      <td>UT Arlington</td>
+                      <td>Memphis</td>
+                      <td>-0.16</td>
+                    </tr>
+                    <tr>
+                      <th>33</th>
+                      <td>G</td>
+                      <td>Brandon Betson</td>
+                      <td>Chicago State</td>
+                      <td>Tulsa</td>
+                      <td>-0.17</td>
+                    </tr>
+                    <tr>
+                      <th>31</th>
+                      <td>G</td>
+                      <td>Xavier Bell</td>
+                      <td>Drexel</td>
+                      <td>Wichita State</td>
+                      <td>-0.18</td>
+                    </tr>
+                    <tr>
+                      <th>273</th>
+                      <td>F</td>
+                      <td>Madiaw Niang</td>
+                      <td>Florida Atlantic</td>
+                      <td>Radford</td>
+                      <td>-0.20</td>
+                    </tr>
+                    <tr>
+                      <th>107</th>
+                      <td>G</td>
+                      <td>Onyebuchi Ezeakudo</td>
+                      <td>Pittsburgh</td>
+                      <td>Radford</td>
+                      <td>-0.21</td>
+                    </tr>
+                    <tr>
+                      <th>324</th>
+                      <td>F</td>
+                      <td>Clarence Rupert</td>
+                      <td>Saint Peter's</td>
+                      <td>Southern Illinois</td>
+                      <td>-0.24</td>
+                    </tr>
+                    <tr>
+                      <th>293</th>
+                      <td>G</td>
+                      <td>Austin Patterson</td>
+                      <td>Wofford</td>
+                      <td>Sacramento State</td>
+                      <td>-0.27</td>
+                    </tr>
+                    <tr>
+                      <th>37</th>
+                      <td>G</td>
+                      <td>Ja'Monta Black</td>
+                      <td>Missouri State</td>
+                      <td>Northwestern State</td>
+                      <td>-0.28</td>
+                    </tr>
+                    <tr>
+                      <th>265</th>
+                      <td>F</td>
+                      <td>Jay Nagle</td>
+                      <td>UC Santa Barbara</td>
+                      <td>Idaho State</td>
+                      <td>-0.29</td>
+                    </tr>
+                    <tr>
+                      <th>237</th>
+                      <td>G</td>
+                      <td>Elijah McCadden</td>
+                      <td>Georgia Southern</td>
+                      <td>Memphis</td>
+                      <td>-0.35</td>
+                    </tr>
+                    <tr>
+                      <th>220</th>
+                      <td>G</td>
+                      <td>Kyrell Luc</td>
+                      <td>Holy Cross</td>
+                      <td>St. Bonaventure</td>
+                      <td>-0.36</td>
+                    </tr>
+                    <tr>
+                      <th>341</th>
+                      <td>G</td>
+                      <td>David Shriver</td>
+                      <td>Hartford</td>
+                      <td>VCU</td>
+                      <td>-0.37</td>
+                    </tr>
+                    <tr>
+                      <th>193</th>
+                      <td>G</td>
+                      <td>Chase Johnston</td>
+                      <td>Stetson</td>
+                      <td>Florida Gulf Coast</td>
+                      <td>-0.38</td>
+                    </tr>
+                    <tr>
+                      <th>54</th>
+                      <td>G</td>
+                      <td>Paul Bruns</td>
+                      <td>North Dakota</td>
+                      <td>South Dakota</td>
+                      <td>-0.40</td>
+                    </tr>
+                    <tr>
+                      <th>362</th>
+                      <td>G</td>
+                      <td>Deon Stroud</td>
+                      <td>Fresno State</td>
+                      <td>Eastern Washington</td>
+                      <td>-0.42</td>
+                    </tr>
+                    <tr>
+                      <th>198</th>
+                      <td>F</td>
+                      <td>Kur Jongkuch</td>
+                      <td>Northern Colorado</td>
+                      <td>Temple</td>
+                      <td>-0.42</td>
+                    </tr>
+                    <tr>
+                      <th>232</th>
+                      <td>F</td>
+                      <td>Jayden Martinez</td>
+                      <td>New Hampshire</td>
+                      <td>North Texas</td>
+                      <td>-0.42</td>
+                    </tr>
+                    <tr>
+                      <th>322</th>
+                      <td>G</td>
+                      <td>Jason Roche</td>
+                      <td>The Citadel</td>
+                      <td>Richmond</td>
+                      <td>-0.43</td>
+                    </tr>
+                    <tr>
+                      <th>123</th>
+                      <td>G</td>
+                      <td>Caleb Fuller</td>
+                      <td>UC Davis</td>
+                      <td>Montana State</td>
+                      <td>-0.44</td>
+                    </tr>
+                    <tr>
+                      <th>206</th>
+                      <td>G</td>
+                      <td>Keondre Kennedy</td>
+                      <td>UMBC</td>
+                      <td>UNCG</td>
+                      <td>-0.44</td>
+                    </tr>
+                    <tr>
+                      <th>244</th>
+                      <td>C</td>
+                      <td>Braxton Meah</td>
+                      <td>Fresno State</td>
+                      <td>Washington</td>
+                      <td>-0.47</td>
+                    </tr>
+                    <tr>
+                      <th>214</th>
+                      <td>G</td>
+                      <td>Ryan Larson</td>
+                      <td>Wofford</td>
+                      <td>College of Charleston</td>
+                      <td>-0.48</td>
+                    </tr>
+                    <tr>
+                      <th>346</th>
+                      <td>C</td>
+                      <td>Moulaye Sissoko</td>
+                      <td>Dayton</td>
+                      <td>North Texas</td>
+                      <td>-0.48</td>
+                    </tr>
+                    <tr>
+                      <th>294</th>
+                      <td>G</td>
+                      <td>Lu'Cye Patterson</td>
+                      <td>Missouri State</td>
+                      <td>Charlotte</td>
+                      <td>-0.49</td>
+                    </tr>
+                    <tr>
+                      <th>98</th>
+                      <td>G</td>
+                      <td>Tyree Eady</td>
+                      <td>North Dakota State</td>
+                      <td>North Texas</td>
+                      <td>-0.50</td>
+                    </tr>
+                    <tr>
+                      <th>105</th>
+                      <td>G</td>
+                      <td>Bryson Etienne</td>
+                      <td>Texas Southern</td>
+                      <td>Southern</td>
+                      <td>-0.53</td>
+                    </tr>
+                    <tr>
+                      <th>269</th>
+                      <td>F</td>
+                      <td>Marek Nelson</td>
+                      <td>Texas�Rio Grande Valley</td>
+                      <td>Nicholls</td>
+                      <td>-0.54</td>
+                    </tr>
+                    <tr>
+                      <th>312</th>
+                      <td>G</td>
+                      <td>Christian Ray</td>
+                      <td>La Salle</td>
+                      <td>Delaware</td>
+                      <td>-0.55</td>
+                    </tr>
+                    <tr>
+                      <th>222</th>
+                      <td>C</td>
+                      <td>Nic Lynch</td>
+                      <td>Lehigh</td>
+                      <td>San Diego</td>
+                      <td>-0.56</td>
+                    </tr>
+                    <tr>
+                      <th>264</th>
+                      <td>F</td>
+                      <td>Patrick Mwamba</td>
+                      <td>UT Arlington</td>
+                      <td>Oral Roberts</td>
+                      <td>-0.57</td>
+                    </tr>
+                    <tr>
+                      <th>88</th>
+                      <td>G</td>
+                      <td>Duke Deen</td>
+                      <td>Troy</td>
+                      <td>Bradley</td>
+                      <td>-0.60</td>
+                    </tr>
+                    <tr>
+                      <th>121</th>
+                      <td>F</td>
+                      <td>Drew Friberg</td>
+                      <td>Princeton</td>
+                      <td>Belmont</td>
+                      <td>-0.61</td>
+                    </tr>
+                    <tr>
+                      <th>22</th>
+                      <td>G</td>
+                      <td>Josh Baker</td>
+                      <td>UNLV</td>
+                      <td>GCU</td>
+                      <td>-0.64</td>
+                    </tr>
+                    <tr>
+                      <th>268</th>
+                      <td>F</td>
+                      <td>Adrian Nelson</td>
+                      <td>Northern Kentucky</td>
+                      <td>Youngstown State</td>
+                      <td>-0.65</td>
+                    </tr>
+                    <tr>
+                      <th>187</th>
+                      <td>G</td>
+                      <td>Jamal Johnson</td>
+                      <td>UAB</td>
+                      <td>Chattanooga</td>
+                      <td>-0.65</td>
+                    </tr>
+                    <tr>
+                      <th>43</th>
+                      <td>G</td>
+                      <td>Ledarrius Brewer</td>
+                      <td>ETSU</td>
+                      <td>UAB</td>
+                      <td>-0.65</td>
+                    </tr>
+                    <tr>
+                      <th>23</th>
+                      <td>C</td>
+                      <td>Aziz Bandaogo</td>
+                      <td>Akron</td>
+                      <td>Utah Valley</td>
+                      <td>-0.66</td>
+                    </tr>
+                    <tr>
+                      <th>75</th>
+                      <td>F</td>
+                      <td>Tyree Corbett</td>
+                      <td>Coppin State</td>
+                      <td>Denver</td>
+                      <td>-0.68</td>
+                    </tr>
+                    <tr>
+                      <th>86</th>
+                      <td>G</td>
+                      <td>Tyreese Davis</td>
+                      <td>Jacksonville</td>
+                      <td>Eastern Washington</td>
+                      <td>-0.69</td>
+                    </tr>
+                    <tr>
+                      <th>134</th>
+                      <td>G</td>
+                      <td>Shamar Givance</td>
+                      <td>Evansville</td>
+                      <td>UTEP</td>
+                      <td>-0.72</td>
+                    </tr>
+                    <tr>
+                      <th>80</th>
+                      <td>G</td>
+                      <td>Kamdyn Curfman</td>
+                      <td>VMI</td>
+                      <td>Marshall</td>
+                      <td>-0.74</td>
+                    </tr>
+                    <tr>
+                      <th>306</th>
+                      <td>G</td>
+                      <td>Skyelar Potter</td>
+                      <td>Morehead State</td>
+                      <td>Jacksonville State</td>
+                      <td>-0.75</td>
+                    </tr>
+                    <tr>
+                      <th>35</th>
+                      <td>F</td>
+                      <td>Jalin Billingsley</td>
+                      <td>Georgetown</td>
+                      <td>Eastern Michigan</td>
+                      <td>-0.78</td>
+                    </tr>
+                    <tr>
+                      <th>100</th>
+                      <td>G</td>
+                      <td>Malik Edmead</td>
+                      <td>Merrimack</td>
+                      <td>Albany</td>
+                      <td>-0.79</td>
+                    </tr>
+                    <tr>
+                      <th>332</th>
+                      <td>G</td>
+                      <td>Colton Sandage</td>
+                      <td>Western Illinois</td>
+                      <td>Illinois State</td>
+                      <td>-0.81</td>
+                    </tr>
+                    <tr>
+                      <th>94</th>
+                      <td>G</td>
+                      <td>Shaun Doss</td>
+                      <td>SIUE</td>
+                      <td>Arkansas�Pine Bluff</td>
+                      <td>-0.82</td>
+                    </tr>
+                    <tr>
+                      <th>382</th>
+                      <td>G</td>
+                      <td>Brenden Tucker</td>
+                      <td>College of Charleston</td>
+                      <td>Georgia State</td>
+                      <td>-0.84</td>
+                    </tr>
+                    <tr>
+                      <th>106</th>
+                      <td>C</td>
+                      <td>Kaosi Ezeagu</td>
+                      <td>Kansas State</td>
+                      <td>Sam Houston State</td>
+                      <td>-0.88</td>
+                    </tr>
+                    <tr>
+                      <th>52</th>
+                      <td>F</td>
+                      <td>Rod Brown</td>
+                      <td>Jacksonville</td>
+                      <td>Tarleton State</td>
+                      <td>-0.89</td>
+                    </tr>
+                    <tr>
+                      <th>163</th>
+                      <td>F</td>
+                      <td>Anquan Hill</td>
+                      <td>Fairleigh Dickinson</td>
+                      <td>St. Bonaventure</td>
+                      <td>-0.91</td>
+                    </tr>
+                    <tr>
+                      <th>161</th>
+                      <td>F</td>
+                      <td>Jordan Henderson</td>
+                      <td>McNeese</td>
+                      <td>Lamar State College�Port Arthur</td>
+                      <td>-0.92</td>
+                    </tr>
+                    <tr>
+                      <th>384</th>
+                      <td>G</td>
+                      <td>Kellen Tynes</td>
+                      <td>Montana State</td>
+                      <td>Maine</td>
+                      <td>-0.93</td>
+                    </tr>
+                    <tr>
+                      <th>364</th>
+                      <td>G</td>
+                      <td>Raheim Sullivan</td>
+                      <td>Marist</td>
+                      <td>NJIT</td>
+                      <td>-0.93</td>
+                    </tr>
+                    <tr>
+                      <th>2</th>
+                      <td>F</td>
+                      <td>Isaiah Adams</td>
+                      <td>UCF</td>
+                      <td>Buffalo</td>
+                      <td>-0.94</td>
+                    </tr>
+                    <tr>
+                      <th>114</th>
+                      <td>G</td>
+                      <td>Jalen Finch</td>
+                      <td>Jacksonville State</td>
+                      <td>Georgia Southern</td>
+                      <td>-0.97</td>
+                    </tr>
+                    <tr>
+                      <th>278</th>
+                      <td>F</td>
+                      <td>Mezie Offurum</td>
+                      <td>Mount St. Mary's</td>
+                      <td>James Madison</td>
+                      <td>-0.98</td>
+                    </tr>
+                    <tr>
+                      <th>333</th>
+                      <td>G</td>
+                      <td>Jorell Saterfield</td>
+                      <td>UTEP</td>
+                      <td>Portland State</td>
+                      <td>-0.99</td>
+                    </tr>
+                    <tr>
+                      <th>348</th>
+                      <td>G</td>
+                      <td>Tahj Small</td>
+                      <td>Tarleton State</td>
+                      <td>Utah Valley</td>
+                      <td>-1.00</td>
+                    </tr>
+                    <tr>
+                      <th>388</th>
+                      <td>C</td>
+                      <td>Chad Venning</td>
+                      <td>Morgan State</td>
+                      <td>St. Bonaventure</td>
+                      <td>-1.00</td>
+                    </tr>
+                    <tr>
+                      <th>138</th>
+                      <td>F</td>
+                      <td>Hunter Goodrick</td>
+                      <td>South Dakota</td>
+                      <td>California Baptist</td>
+                      <td>-1.00</td>
+                    </tr>
+                    <tr>
+                      <th>383</th>
+                      <td>F</td>
+                      <td>Luke Turner</td>
+                      <td>Wofford</td>
+                      <td>UC Riverside</td>
+                      <td>-1.01</td>
+                    </tr>
+                    <tr>
+                      <th>365</th>
+                      <td>G</td>
+                      <td>Blondeau Tchoukuiegno</td>
+                      <td>New Hampshire</td>
+                      <td>California Baptist</td>
+                      <td>-1.02</td>
+                    </tr>
+                    <tr>
+                      <th>38</th>
+                      <td>G</td>
+                      <td>Jamari Blackmon</td>
+                      <td>North Alabama</td>
+                      <td>Louisiana�Monroe</td>
+                      <td>-1.03</td>
+                    </tr>
+                    <tr>
+                      <th>326</th>
+                      <td>G</td>
+                      <td>Nygal Russell</td>
+                      <td>Southeast Missouri State</td>
+                      <td>Towson</td>
+                      <td>-1.03</td>
+                    </tr>
+                    <tr>
+                      <th>292</th>
+                      <td>G</td>
+                      <td>Sarju Patel</td>
+                      <td>Cornell</td>
+                      <td>Albany</td>
+                      <td>-1.03</td>
+                    </tr>
+                    <tr>
+                      <th>290</th>
+                      <td>G</td>
+                      <td>Cameron Parker</td>
+                      <td>Montana</td>
+                      <td>Portland State</td>
+                      <td>-1.05</td>
+                    </tr>
+                    <tr>
+                      <th>147</th>
+                      <td>F</td>
+                      <td>Nick Guadarrama</td>
+                      <td>New Hampshire</td>
+                      <td>Florida International</td>
+                      <td>-1.06</td>
+                    </tr>
+                    <tr>
+                      <th>253</th>
+                      <td>G</td>
+                      <td>Aanen Moody</td>
+                      <td>Southern Utah</td>
+                      <td>Montana</td>
+                      <td>-1.08</td>
+                    </tr>
+                    <tr>
+                      <th>415</th>
+                      <td>F</td>
+                      <td>Dima Zdor</td>
+                      <td>GCU</td>
+                      <td>Texas�Rio Grande Valley</td>
+                      <td>-1.08</td>
+                    </tr>
+                    <tr>
+                      <th>56</th>
+                      <td>G</td>
+                      <td>Caleb Burgess</td>
+                      <td>Hofstra</td>
+                      <td>UNC Asheville</td>
+                      <td>-1.12</td>
+                    </tr>
+                    <tr>
+                      <th>300</th>
+                      <td>F</td>
+                      <td>Joe Petrakis</td>
+                      <td>Western Carolina</td>
+                      <td>Illinois State</td>
+                      <td>-1.13</td>
+                    </tr>
+                    <tr>
+                      <th>112</th>
+                      <td>G</td>
+                      <td>Caleb Fields</td>
+                      <td>Bowling Green</td>
+                      <td>Fairfield</td>
+                      <td>-1.17</td>
+                    </tr>
+                    <tr>
+                      <th>50</th>
+                      <td>G</td>
+                      <td>Jomaru Brown</td>
+                      <td>Eastern Kentucky</td>
+                      <td>Coastal Carolina</td>
+                      <td>-1.19</td>
+                    </tr>
+                    <tr>
+                      <th>30</th>
+                      <td>F</td>
+                      <td>Braden Bell</td>
+                      <td>Marist</td>
+                      <td>Prairie View A&amp;M</td>
+                      <td>-1.22</td>
+                    </tr>
+                    <tr>
+                      <th>398</th>
+                      <td>G</td>
+                      <td>Desmond Williams</td>
+                      <td>Troy</td>
+                      <td>UT Martin</td>
+                      <td>-1.29</td>
+                    </tr>
+                    <tr>
+                      <th>176</th>
+                      <td>F</td>
+                      <td>Sammy Hunter</td>
+                      <td>Ole Miss</td>
+                      <td>Akron</td>
+                      <td>-1.30</td>
+                    </tr>
+                    <tr>
+                      <th>407</th>
+                      <td>F</td>
+                      <td>Hunter Woods</td>
+                      <td>Elon</td>
+                      <td>Portland State</td>
+                      <td>-1.30</td>
+                    </tr>
+                    <tr>
+                      <th>200</th>
+                      <td>C</td>
+                      <td>Isaac Kante</td>
+                      <td>LIU</td>
+                      <td>Massachusetts</td>
+                      <td>-1.30</td>
+                    </tr>
+                    <tr>
+                      <th>12</th>
+                      <td>F</td>
+                      <td>Alex Anderson</td>
+                      <td>South Alabama</td>
+                      <td>Alabama State</td>
+                      <td>-1.30</td>
+                    </tr>
+                    <tr>
+                      <th>355</th>
+                      <td>C</td>
+                      <td>Joey St. Pierre</td>
+                      <td>Milwaukee</td>
+                      <td>Portland</td>
+                      <td>-1.32</td>
+                    </tr>
+                    <tr>
+                      <th>199</th>
+                      <td>G</td>
+                      <td>Gedi Juozapaitis</td>
+                      <td>Georgia Southern</td>
+                      <td>Maine</td>
+                      <td>-1.36</td>
+                    </tr>
+                    <tr>
+                      <th>225</th>
+                      <td>F</td>
+                      <td>Dravon Mangum</td>
+                      <td>Radford</td>
+                      <td>Louisiana Tech</td>
+                      <td>-1.37</td>
+                    </tr>
+                    <tr>
+                      <th>372</th>
+                      <td>G</td>
+                      <td>Tyler Thomas</td>
+                      <td>Sacred Heart</td>
+                      <td>Hofstra</td>
+                      <td>-1.39</td>
+                    </tr>
+                    <tr>
+                      <th>329</th>
+                      <td>G</td>
+                      <td>Morgan Safford</td>
+                      <td>Wofford</td>
+                      <td>Miami (OH)</td>
+                      <td>-1.42</td>
+                    </tr>
+                    <tr>
+                      <th>208</th>
+                      <td>C</td>
+                      <td>Lukas Kisunas</td>
+                      <td>Stanford</td>
+                      <td>Denver</td>
+                      <td>-1.42</td>
+                    </tr>
+                    <tr>
+                      <th>62</th>
+                      <td>G</td>
+                      <td>Kyle Cardaci</td>
+                      <td>Coppin State</td>
+                      <td>Saint Peter's</td>
+                      <td>-1.42</td>
+                    </tr>
+                    <tr>
+                      <th>369</th>
+                      <td>G</td>
+                      <td>Kalil Thomas</td>
+                      <td>UMass Lowell</td>
+                      <td>Morehead State</td>
+                      <td>-1.45</td>
+                    </tr>
+                    <tr>
+                      <th>286</th>
+                      <td>G</td>
+                      <td>L.J. Owens</td>
+                      <td>UMBC</td>
+                      <td>Delaware</td>
+                      <td>-1.45</td>
+                    </tr>
+                    <tr>
+                      <th>36</th>
+                      <td>G</td>
+                      <td>Dahmir Bishop</td>
+                      <td>Saint Joseph's</td>
+                      <td>Florida Gulf Coast</td>
+                      <td>-1.45</td>
+                    </tr>
+                    <tr>
+                      <th>280</th>
+                      <td>G</td>
+                      <td>Toby Okani</td>
+                      <td>Duquesne</td>
+                      <td>UIC</td>
+                      <td>-1.45</td>
+                    </tr>
+                    <tr>
+                      <th>11</th>
+                      <td>G</td>
+                      <td>Kellen Amos</td>
+                      <td>Binghamton</td>
+                      <td>Central Connecticut State</td>
+                      <td>-1.46</td>
+                    </tr>
+                    <tr>
+                      <th>235</th>
+                      <td>G</td>
+                      <td>Bryce McBride</td>
+                      <td>Eastern Michigan</td>
+                      <td>Youngstown State</td>
+                      <td>-1.47</td>
+                    </tr>
+                    <tr>
+                      <th>400</th>
+                      <td>G</td>
+                      <td>Jelani Williams</td>
+                      <td>Penn</td>
+                      <td>Howard</td>
+                      <td>-1.50</td>
+                    </tr>
+                    <tr>
+                      <th>327</th>
+                      <td>F</td>
+                      <td>Nikkei Rutty</td>
+                      <td>Monmouth</td>
+                      <td>Prairie View A&amp;M</td>
+                      <td>-1.50</td>
+                    </tr>
+                    <tr>
+                      <th>197</th>
+                      <td>G</td>
+                      <td>Russell Jones</td>
+                      <td>Winthrop</td>
+                      <td>Western Carolina</td>
+                      <td>-1.52</td>
+                    </tr>
+                    <tr>
+                      <th>396</th>
+                      <td>G</td>
+                      <td>Dalvin White</td>
+                      <td>USC Upstate</td>
+                      <td>Chattanooga</td>
+                      <td>-1.53</td>
+                    </tr>
+                    <tr>
+                      <th>338</th>
+                      <td>F</td>
+                      <td>Jaylen Sebree</td>
+                      <td>Morehead State</td>
+                      <td>Tennessee Tech</td>
+                      <td>-1.53</td>
+                    </tr>
+                    <tr>
+                      <th>117</th>
+                      <td>G</td>
+                      <td>Ahamadou Fofana</td>
+                      <td>Canisius</td>
+                      <td>Maryland Eastern Shore</td>
+                      <td>-1.55</td>
+                    </tr>
+                    <tr>
+                      <th>376</th>
+                      <td>F</td>
+                      <td>George Tinsley</td>
+                      <td>Binghamton</td>
+                      <td>Mount St. Mary's</td>
+                      <td>-1.57</td>
+                    </tr>
+                    <tr>
+                      <th>274</th>
+                      <td>G</td>
+                      <td>DQ Nicholas</td>
+                      <td>Southeast Missouri State</td>
+                      <td>Gardner�Webb</td>
+                      <td>-1.58</td>
+                    </tr>
+                    <tr>
+                      <th>271</th>
+                      <td>G</td>
+                      <td>Donovan Newby</td>
+                      <td>Milwaukee</td>
+                      <td>UNCW</td>
+                      <td>-1.61</td>
+                    </tr>
+                    <tr>
+                      <th>1</th>
+                      <td>G</td>
+                      <td>Tyson Acuff</td>
+                      <td>Duquesne</td>
+                      <td>Eastern Michigan</td>
+                      <td>-1.62</td>
+                    </tr>
+                    <tr>
+                      <th>370</th>
+                      <td>G</td>
+                      <td>Micah Thomas</td>
+                      <td>Indiana State</td>
+                      <td>Nicholls</td>
+                      <td>-1.66</td>
+                    </tr>
+                    <tr>
+                      <th>153</th>
+                      <td>G</td>
+                      <td>Maleeck Harden-Hayes</td>
+                      <td>North Dakota State</td>
+                      <td>UNCW</td>
+                      <td>-1.67</td>
+                    </tr>
+                    <tr>
+                      <th>262</th>
+                      <td>F</td>
+                      <td>Kendall Munson</td>
+                      <td>Pepperdine</td>
+                      <td>Portland State</td>
+                      <td>-1.68</td>
+                    </tr>
+                    <tr>
+                      <th>150</th>
+                      <td>G</td>
+                      <td>Isaac Haney</td>
+                      <td>Missouri State</td>
+                      <td>Northwestern State</td>
+                      <td>-1.73</td>
+                    </tr>
+                    <tr>
+                      <th>72</th>
+                      <td>F</td>
+                      <td>Noah Collier</td>
+                      <td>Pittsburgh</td>
+                      <td>William &amp; Mary</td>
+                      <td>-1.73</td>
+                    </tr>
+                    <tr>
+                      <th>390</th>
+                      <td>F</td>
+                      <td>Garrison Wade</td>
+                      <td>Dartmouth</td>
+                      <td>Cal State Fullerton</td>
+                      <td>-1.74</td>
+                    </tr>
+                    <tr>
+                      <th>318</th>
+                      <td>G</td>
+                      <td>Anthony Roberts</td>
+                      <td>St. Cloud State</td>
+                      <td>Purdue Fort Wayne</td>
+                      <td>-1.75</td>
+                    </tr>
+                    <tr>
+                      <th>9</th>
+                      <td>F</td>
+                      <td>Josh Aldrich</td>
+                      <td>USC Upstate</td>
+                      <td>Charlotte</td>
+                      <td>-1.78</td>
+                    </tr>
+                    <tr>
+                      <th>174</th>
+                      <td>F</td>
+                      <td>Chance Hunter</td>
+                      <td>California Baptist</td>
+                      <td>Cal Poly</td>
+                      <td>-1.79</td>
+                    </tr>
+                    <tr>
+                      <th>207</th>
+                      <td>G</td>
+                      <td>Jayson Kent</td>
+                      <td>Bradley</td>
+                      <td>Indiana State</td>
+                      <td>-1.83</td>
+                    </tr>
+                    <tr>
+                      <th>405</th>
+                      <td>G</td>
+                      <td>Khaleb Wilson-Rouse</td>
+                      <td>Pacific</td>
+                      <td>New Orleans</td>
+                      <td>-1.89</td>
+                    </tr>
+                    <tr>
+                      <th>374</th>
+                      <td>G</td>
+                      <td>Messiah Thompson</td>
+                      <td>Campbell</td>
+                      <td>Alabama A&amp;M</td>
+                      <td>-1.92</td>
+                    </tr>
+                    <tr>
+                      <th>336</th>
+                      <td>G</td>
+                      <td>Jordan Sears</td>
+                      <td>Gardner�Webb</td>
+                      <td>UT Martin</td>
+                      <td>-1.93</td>
+                    </tr>
+                    <tr>
+                      <th>231</th>
+                      <td>G</td>
+                      <td>Judson Martindale</td>
+                      <td>Holy Cross</td>
+                      <td>Pacific</td>
+                      <td>-1.94</td>
+                    </tr>
+                    <tr>
+                      <th>325</th>
+                      <td>G</td>
+                      <td>Brandon Rush</td>
+                      <td>Fairleigh Dickinson</td>
+                      <td>Youngstown State</td>
+                      <td>-1.94</td>
+                    </tr>
+                    <tr>
+                      <th>213</th>
+                      <td>F</td>
+                      <td>Zool Kueth</td>
+                      <td>Northern Illinois</td>
+                      <td>Tennessee State</td>
+                      <td>-1.95</td>
+                    </tr>
+                    <tr>
+                      <th>32</th>
+                      <td>G</td>
+                      <td>T.J. Berger</td>
+                      <td>San Diego</td>
+                      <td>Lafayette</td>
+                      <td>-1.95</td>
+                    </tr>
+                    <tr>
+                      <th>267</th>
+                      <td>G</td>
+                      <td>Walyn Napper</td>
+                      <td>Southern Miss</td>
+                      <td>Longwood</td>
+                      <td>-1.97</td>
+                    </tr>
+                    <tr>
+                      <th>160</th>
+                      <td>G</td>
+                      <td>Cameron Healy</td>
+                      <td>Central Michigan</td>
+                      <td>Southern Utah</td>
+                      <td>-1.98</td>
+                    </tr>
+                    <tr>
+                      <th>319</th>
+                      <td>G</td>
+                      <td>C.J. Roberts</td>
+                      <td>Lamar</td>
+                      <td>Texas A&amp;M�Commerce</td>
+                      <td>-1.98</td>
+                    </tr>
+                    <tr>
+                      <th>162</th>
+                      <td>G</td>
+                      <td>Jeremiah Hernandez</td>
+                      <td>Kent State</td>
+                      <td>Southern Indiana</td>
+                      <td>-1.98</td>
+                    </tr>
+                    <tr>
+                      <th>51</th>
+                      <td>G</td>
+                      <td>Kyree Brown</td>
+                      <td>Seattle</td>
+                      <td>New Hampshire</td>
+                      <td>-1.99</td>
+                    </tr>
+                    <tr>
+                      <th>91</th>
+                      <td>F</td>
+                      <td>Kobe Dickson</td>
+                      <td>Cornell</td>
+                      <td>Howard</td>
+                      <td>-2.01</td>
+                    </tr>
+                    <tr>
+                      <th>371</th>
+                      <td>F</td>
+                      <td>Miryne Thomas</td>
+                      <td>Ball State</td>
+                      <td>Kent State</td>
+                      <td>-2.02</td>
+                    </tr>
+                    <tr>
+                      <th>48</th>
+                      <td>G</td>
+                      <td>Brandon Brown</td>
+                      <td>Arkansas�Pine Bluff</td>
+                      <td>Wagner</td>
+                      <td>-2.07</td>
+                    </tr>
+                    <tr>
+                      <th>248</th>
+                      <td>C</td>
+                      <td>David Mitchell</td>
+                      <td>Brown</td>
+                      <td>Niagara</td>
+                      <td>-2.08</td>
+                    </tr>
+                    <tr>
+                      <th>113</th>
+                      <td>C</td>
+                      <td>Kyler Filewich</td>
+                      <td>Southern Illinois</td>
+                      <td>Wofford</td>
+                      <td>-2.09</td>
+                    </tr>
+                    <tr>
+                      <th>167</th>
+                      <td>G</td>
+                      <td>Jalen Hodge</td>
+                      <td>James Madison</td>
+                      <td>SIUE</td>
+                      <td>-2.12</td>
+                    </tr>
+                    <tr>
+                      <th>0</th>
+                      <td>F</td>
+                      <td>Riley Abercrombie</td>
+                      <td>Rice</td>
+                      <td>Northern Colorado</td>
+                      <td>-2.13</td>
+                    </tr>
+                    <tr>
+                      <th>258</th>
+                      <td>G</td>
+                      <td>Jamir Moultrie</td>
+                      <td>Kennesaw State</td>
+                      <td>Canisius</td>
+                      <td>-2.13</td>
+                    </tr>
+                    <tr>
+                      <th>58</th>
+                      <td>F</td>
+                      <td>Cam Burrell</td>
+                      <td>Western Illinois</td>
+                      <td>Lindenwood</td>
+                      <td>-2.14</td>
+                    </tr>
+                    <tr>
+                      <th>20</th>
+                      <td>F</td>
+                      <td>Jaxson Baker</td>
+                      <td>Central Arkansas</td>
+                      <td>New Hampshire</td>
+                      <td>-2.15</td>
+                    </tr>
+                    <tr>
+                      <th>201</th>
+                      <td>G</td>
+                      <td>Joe Kasperzyk</td>
+                      <td>Southeastern Louisiana</td>
+                      <td>Niagara</td>
+                      <td>-2.17</td>
+                    </tr>
+                    <tr>
+                      <th>378</th>
+                      <td>F</td>
+                      <td>Sam Towns</td>
+                      <td>Ohio</td>
+                      <td>Bowling Green</td>
+                      <td>-2.17</td>
+                    </tr>
+                    <tr>
+                      <th>299</th>
+                      <td>G</td>
+                      <td>Tyrone Perry</td>
+                      <td>Buffalo</td>
+                      <td>New Haven</td>
+                      <td>-2.17</td>
+                    </tr>
+                    <tr>
+                      <th>241</th>
+                      <td>G</td>
+                      <td>Trenton McLaughlin</td>
+                      <td>Central Connecticut State</td>
+                      <td>Northern Arizona</td>
+                      <td>-2.20</td>
+                    </tr>
+                    <tr>
+                      <th>406</th>
+                      <td>G</td>
+                      <td>JaCobi Wood</td>
+                      <td>Belmont</td>
+                      <td>Murray State</td>
+                      <td>-2.21</td>
+                    </tr>
+                    <tr>
+                      <th>281</th>
+                      <td>G</td>
+                      <td>Erik Oliver</td>
+                      <td>South Dakota</td>
+                      <td>Tennessee Tech</td>
+                      <td>-2.23</td>
+                    </tr>
+                    <tr>
+                      <th>350</th>
+                      <td>G</td>
+                      <td>DaQuan Smith</td>
+                      <td>Murray State</td>
+                      <td>Radford</td>
+                      <td>-2.29</td>
+                    </tr>
+                    <tr>
+                      <th>260</th>
+                      <td>G</td>
+                      <td>Chris Mullins</td>
+                      <td>Rice</td>
+                      <td>William &amp; Mary</td>
+                      <td>-2.30</td>
+                    </tr>
+                    <tr>
+                      <th>408</th>
+                      <td>F</td>
+                      <td>Trey Woodyard</td>
+                      <td>Valparaiso</td>
+                      <td>New Hampshire</td>
+                      <td>-2.31</td>
+                    </tr>
+                    <tr>
+                      <th>67</th>
+                      <td>F</td>
+                      <td>Derrick Carter-Hollinger</td>
+                      <td>Montana</td>
+                      <td>Bethune�Cookman</td>
+                      <td>-2.32</td>
+                    </tr>
+                    <tr>
+                      <th>92</th>
+                      <td>C</td>
+                      <td>Lewis Djonkam</td>
+                      <td>Radford</td>
+                      <td>Morgan State</td>
+                      <td>-2.32</td>
+                    </tr>
+                    <tr>
+                      <th>296</th>
+                      <td>C</td>
+                      <td>Tamell Pearson</td>
+                      <td>Western Illinois</td>
+                      <td>Appalachian State</td>
+                      <td>-2.34</td>
+                    </tr>
+                    <tr>
+                      <th>120</th>
+                      <td>G</td>
+                      <td>Mark Freeman</td>
+                      <td>Illinois State</td>
+                      <td>Morehead State</td>
+                      <td>-2.35</td>
+                    </tr>
+                    <tr>
+                      <th>82</th>
+                      <td>G</td>
+                      <td>Brent Davis</td>
+                      <td>The Citadel</td>
+                      <td>Chicago State</td>
+                      <td>-2.38</td>
+                    </tr>
+                    <tr>
+                      <th>3</th>
+                      <td>G</td>
+                      <td>Christian Agnew</td>
+                      <td>UTEP</td>
+                      <td>Southeastern Louisiana</td>
+                      <td>-2.41</td>
+                    </tr>
+                    <tr>
+                      <th>203</th>
+                      <td>F</td>
+                      <td>Japannah Kellogg</td>
+                      <td>Green Bay</td>
+                      <td>Albany</td>
+                      <td>-2.43</td>
+                    </tr>
+                    <tr>
+                      <th>93</th>
+                      <td>F</td>
+                      <td>Jarvis Doles</td>
+                      <td>Albany</td>
+                      <td>UMBC</td>
+                      <td>-2.46</td>
+                    </tr>
+                    <tr>
+                      <th>189</th>
+                      <td>F</td>
+                      <td>Nathan Johnson</td>
+                      <td>UMBC</td>
+                      <td>Samford</td>
+                      <td>-2.46</td>
+                    </tr>
+                    <tr>
+                      <th>188</th>
+                      <td>G</td>
+                      <td>Jordan Johnson</td>
+                      <td>Denver</td>
+                      <td>New Orleans</td>
+                      <td>-2.48</td>
+                    </tr>
+                    <tr>
+                      <th>228</th>
+                      <td>F</td>
+                      <td>Romelle Mansel</td>
+                      <td>Long Beach State</td>
+                      <td>Jackson State</td>
+                      <td>-2.50</td>
+                    </tr>
+                    <tr>
+                      <th>247</th>
+                      <td>C</td>
+                      <td>Anderson Mirambeaux</td>
+                      <td>Cleveland State</td>
+                      <td>Miami (OH)</td>
+                      <td>-2.51</td>
+                    </tr>
+                    <tr>
+                      <th>195</th>
+                      <td>G</td>
+                      <td>Kanye Jones</td>
+                      <td>Boston College</td>
+                      <td>Buffalo</td>
+                      <td>-2.55</td>
+                    </tr>
+                    <tr>
+                      <th>205</th>
+                      <td>F</td>
+                      <td>Jeremiah Kendall</td>
+                      <td>Prairie View A&amp;M</td>
+                      <td>Alcorn State</td>
+                      <td>-2.56</td>
+                    </tr>
+                    <tr>
+                      <th>115</th>
+                      <td>G</td>
+                      <td>Nick Fleming</td>
+                      <td>Southern Utah</td>
+                      <td>Cal Poly</td>
+                      <td>-2.60</td>
+                    </tr>
+                    <tr>
+                      <th>360</th>
+                      <td>G</td>
+                      <td>Lucas Stieber</td>
+                      <td>Green Bay</td>
+                      <td>Gardner�Webb</td>
+                      <td>-2.65</td>
+                    </tr>
+                    <tr>
+                      <th>25</th>
+                      <td>F</td>
+                      <td>Michael Barber</td>
+                      <td>Alabama State</td>
+                      <td>Mississippi Valley State</td>
+                      <td>-2.66</td>
+                    </tr>
+                    <tr>
+                      <th>283</th>
+                      <td>F</td>
+                      <td>Kevin Osawe</td>
+                      <td>Little Rock</td>
+                      <td>NJIT</td>
+                      <td>-2.68</td>
+                    </tr>
+                    <tr>
+                      <th>60</th>
+                      <td>G</td>
+                      <td>Alex Caldwell</td>
+                      <td>North Carolina Central</td>
+                      <td>UNC Asheville</td>
+                      <td>-2.74</td>
+                    </tr>
+                    <tr>
+                      <th>245</th>
+                      <td>C</td>
+                      <td>Brendan Medley-Bacon</td>
+                      <td>McNeese</td>
+                      <td>North Carolina Central</td>
+                      <td>-2.76</td>
+                    </tr>
+                    <tr>
+                      <th>314</th>
+                      <td>G</td>
+                      <td>Juan Reyna</td>
+                      <td>Alabama State</td>
+                      <td>Campbell</td>
+                      <td>-2.91</td>
+                    </tr>
+                    <tr>
+                      <th>403</th>
+                      <td>F</td>
+                      <td>Warren Williams</td>
+                      <td>Manhattan</td>
+                      <td>Hofstra</td>
+                      <td>-2.94</td>
+                    </tr>
+                    <tr>
+                      <th>287</th>
+                      <td>G</td>
+                      <td>Dylan O'Hearn</td>
+                      <td>NJIT</td>
+                      <td>Jacksonville</td>
+                      <td>-3.09</td>
+                    </tr>
+                    <tr>
+                      <th>209</th>
+                      <td>G</td>
+                      <td>Maks Klanjscek</td>
+                      <td>Maine</td>
+                      <td>Houston Christian</td>
+                      <td>-3.11</td>
+                    </tr>
+                    <tr>
+                      <th>387</th>
+                      <td>F</td>
+                      <td>Luka Vasic</td>
+                      <td>Charlotte</td>
+                      <td>Texas A&amp;M�Commerce</td>
+                      <td>-3.20</td>
+                    </tr>
+                    <tr>
+                      <th>68</th>
+                      <td>C</td>
+                      <td>Tanner Christensen</td>
+                      <td>Idaho</td>
+                      <td>Utah Tech</td>
+                      <td>-3.20</td>
+                    </tr>
+                    <tr>
+                      <th>345</th>
+                      <td>F</td>
+                      <td>Blake Sisley</td>
+                      <td>Evansville</td>
+                      <td>Wright State</td>
+                      <td>-3.22</td>
+                    </tr>
+                    <tr>
+                      <th>179</th>
+                      <td>G</td>
+                      <td>Ethan Igbanugo</td>
+                      <td>North Dakota</td>
+                      <td>Cal State Northridge</td>
+                      <td>-3.23</td>
+                    </tr>
+                    <tr>
+                      <th>380</th>
+                      <td>C</td>
+                      <td>Emmanuel Tshimanga</td>
+                      <td>UC Irvine</td>
+                      <td>UC San Diego</td>
+                      <td>-3.26</td>
+                    </tr>
+                    <tr>
+                      <th>13</th>
+                      <td>G</td>
+                      <td>Boogie Anderson</td>
+                      <td>South Dakota</td>
+                      <td>Southeastern Louisiana</td>
+                      <td>-3.26</td>
+                    </tr>
+                    <tr>
+                      <th>343</th>
+                      <td>F</td>
+                      <td>Tafari Simms</td>
+                      <td>Milwaukee</td>
+                      <td>Western Michigan</td>
+                      <td>-3.26</td>
+                    </tr>
+                    <tr>
+                      <th>334</th>
+                      <td>G</td>
+                      <td>Keshaun Saunders</td>
+                      <td>Toledo</td>
+                      <td>Portland State</td>
+                      <td>-3.36</td>
+                    </tr>
+                    <tr>
+                      <th>76</th>
+                      <td>G</td>
+                      <td>Yuri Covington</td>
+                      <td>William &amp; Mary</td>
+                      <td>UMass Lowell</td>
+                      <td>-3.56</td>
+                    </tr>
+                    <tr>
+                      <th>158</th>
+                      <td>F</td>
+                      <td>Langdon Hatton</td>
+                      <td>William &amp; Mary</td>
+                      <td>Bellarmine</td>
+                      <td>-3.68</td>
+                    </tr>
+                    <tr>
+                      <th>224</th>
+                      <td>C</td>
+                      <td>Adong Makuoi</td>
+                      <td>Northern Illinois</td>
+                      <td>Tennessee State</td>
+                      <td>-3.77</td>
+                    </tr>
+                    <tr>
+                      <th>111</th>
+                      <td>G</td>
+                      <td>Kam Farris</td>
+                      <td>Robert Morris</td>
+                      <td>Marist</td>
+                      <td>-3.89</td>
+                    </tr>
+                    <tr>
+                      <th>349</th>
+                      <td>G</td>
+                      <td>Aquan Smart</td>
+                      <td>Florida International</td>
+                      <td>Southeast Missouri State</td>
+                      <td>-3.99</td>
+                    </tr>
+                    <tr>
+                      <th>118</th>
+                      <td>G</td>
+                      <td>Chris Ford</td>
+                      <td>Davidson</td>
+                      <td>Robert Morris</td>
+                      <td>-4.23</td>
+                    </tr>
+                    <tr>
+                      <th>149</th>
+                      <td>G</td>
+                      <td>Devon Hancock</td>
+                      <td>Milwaukee</td>
+                      <td>Louisiana�Monroe</td>
+                      <td>-4.56</td>
+                    </tr>
+                    <tr>
+                      <th>285</th>
+                      <td>F</td>
+                      <td>Kyle Owens</td>
+                      <td>Montana</td>
+                      <td>UC Riverside</td>
+                      <td>-5.24</td>
+                    </tr>
+                  </tbody>
+                    </table>
+                
+                </div>
+                <p class="text-center mt-3">*Some players may be exluded to due to inconsistencies when merging data from different sources.*</p>
+            </div>
+        </div>
+
+        <!-- 6th row (Analysis) -->
+        <div class="align-top mt-5 mb-5" id="analysis">
+            <h6 class="display-6 text-center">Analysis</h6>
+            <p class="text-center mt-2">Come back for full analysis upon the completion of the 2022-23 season</p>
+        </div>
+
+        <!-- Return to homepage link -->
+        <div class="align-bottom mt-5 mb-3 text-center align-items-center">
+            <a href="#top">Return to Top of Page</a>
+        </div>
+
+
+    </article>
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+    <!-- to enable special table functions (want to order predicted BPM in descending order) -->
+    <script>
+        $(document).ready(function () {
+            $('#main-table').DataTable( {
+                order: [[5, 'desc']],
+            });
+        });
+    </script>
+
+</body>
+</html>

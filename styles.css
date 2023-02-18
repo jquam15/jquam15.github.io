@@ -23,8 +23,28 @@ section div h1, h2 {
 }
 
 .carousel-link {
-    color:#0A1828;
+    color:#0A1828 !important;
     font-weight:bold;
+}
+
+.carousel-link1 {
+    color:#BFA181 !important;
+    font-weight: bold;
+}
+
+.carousel-link1-text {
+    color:#BFA181 !important;
+    font-weight: bold;
+    position:relative;
+    top:-10px;
+}
+
+a.carousel-link:hover {
+    color:#BFA181 !important;
+}
+
+a.carousel-link1:hover {
+    color:#178582 !important;
 }
 
 #home h6 {
@@ -42,6 +62,13 @@ section div h1, h2 {
     font-size: 2em;
 }
 
+.carousel-title1
+{
+    color:#BFA181 !important;
+    font-weight: bold;
+    font-size: 2em;
+}
+
 section div p {
     /* color:#DEB992; */
     color: #BFA181;
@@ -51,6 +78,11 @@ section div p {
     /* color: #1BA098; */
     color: #178582;
 
+}
+
+.carousel-item img {
+    height: 85%;
+    opacity: 60%;
 }
 
 /* .btn {
