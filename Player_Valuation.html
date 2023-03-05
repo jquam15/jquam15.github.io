@@ -1,0 +1,4026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Valuation</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    
+    <!-- bootstrap 5 table styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
+    <!-- My personal table styling -->
+    <link rel="stylesheet" href="table.css">
+    <!-- javascript files for creating table with pagination, searchability, and sortable columns -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/dataTables.bootstrap5.min.js"></script>
+    <!-- My personal stylesheet (re-using the one I used for the transfer page) -->
+    <link rel="stylesheet" href="valuation.css">
+</head>
+<body>
+
+
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-light py-3 navbar-toggle" id="top">
+
+        <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+
+        <div class="container-xxl">
+            <div class="collapse navbar-collapse justify-content-end align-center" id="main-nav">
+                <div class="navbar-nav">
+                    <a href="#valuation" class="nav-item nav-link">Valuation</a>
+                    <a href="index.html" class="nav-item nav-link">Return to Homepage</a>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home">
+        <div class="container-xl pt-3">
+            <div class="row justify-content-center align-items-center">
+                <!-- Name main title -->
+                <div class="col-md-6 text-center align-items-center">
+                    <h4 class="display-4 text-center mb-3">Welcome to My Take on NBA Player Valuation!</h4>
+                    <p>Check out the code on my <a href="https://github.com/jquam15/player_valuation" class="text-decoration-underline">Github!</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main article -->
+    <article class="mt-5">
+        <!-- First row (Introduction) -->
+        <div class="row align-top" id="intro">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center">Introduction</h6>
+                <p class="text-article mt-3">
+                  The discourse in the NBA is often centered around how good a player is and if they are better than some other player. Nowadays, 
+                  the MVP discourse starts 15 games into the season as fans and media alike love to debate who the best players are and how they 
+                  stack up against each other. While this can certainly be entertaining, I believe that too much emphasis is put on how “good” a 
+                  player is, and too little is put on how “valuable” they are. It is obviously in NBA teams best interest to acquire as many of 
+                  the best players as they can, but the reality is that they don't have infinite money. Some teams spend more than others due to 
+                  the soft cap, but all teams are financially constrained at some point or another. What I attempt to do here is estimate how valuable 
+                  a player is compared to their contract to find patterns in overvalued and undervalued players in the league. While this idea is not 
+                  new, I believe that my spin on NBA player valuation using FiveThirtyEight's RAPTOR WAR to generate value estimates leads to some 
+                  interesting findings. 
+                </p>
+                <p class="text-article">
+                  FiveThirtyEight's Robust Algorithm (using) Player Tracking (and) On/Off Ratings (RAPTOR) is an advanced NBA statistic that utilizes 
+                  modern player tracking and play-by-play data to estimate the number of points a player contributes to their team's offense and defense 
+                  per 100 possessions relative to the average player. If you'd like to see FiveThirtyEight's full write up about RAPTOR follow this 
+                  <a href="https://fivethirtyeight.com/features/how-our-raptor-metric-works/">link</a>. One benefit of RAPTOR compared to other advanced 
+                  stats is that it attempts to put more value on skills such as floor spacing that are highly valued by NBA teams. Another benefit is that 
+                  one is able to convert RAPTOR into a wins above replacement (WAR) measure by using a formula that FiveThirtyEight provides. This formula 
+                  can be found in their writeup that I added a link to earlier. As I will go into further in the next section, the WAR values are integral 
+                  to estimating a player's value in dollars. 
+                </p>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 text-center fig-title-right">Figure 1</figcaption>
+                    <img src="images/538_table.png" alt="Sample Transfer Data" class="mt-3">
+                    <figcaption class="mt-3 text-center">First few rows of FiveThirtyEight's RAPTOR table for the 2022-23 season so far</figcaption>
+                </figure>
+            </div>
+        </div>
+
+         <!-- Second row (Method) -->
+         <div class="row align-top mt-5" id="method">
+            <!-- Left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <figure>
+                    <figcaption class="mb-2 mt-3 text-center fig-title-left">Figure 2</figcaption>
+                    <img src="images/war_value.png" alt="Modeling Diagram" class="left-image mt-3">
+                    <figcaption class="mt-4 text-center modeling-diagram">How much on average NBA teams spend for a Win Above Replacement (WAR)</figcaption>
+                </figure>
+            </div>
+            <!-- Right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+                <h6 class="display-6 text-center text-title-right">Method</h6>
+                <p class="text-right mt-3">
+                  Before I could get into estimating a player's value, I first needed to estimate the number of dollars per win above replacement 
+                  ($/WAR). To do this I summed every team's total salary to find the number of dollars NBA teams spent on salaries for each year 
+                  from 2013-14 to 2021-22 (since player tracking data became available). I also summed all the individual player WARs for each of 
+                  the same nine seasons. This left me with the total number of dollars spent on players as well as the total WAR accumulated by players 
+                  for each of the nine years. To get dollars per win above replacement I simply divided the total salaries and divided by the total WAR 
+                  to get the average value of a win above replacement. These findings can be seen in Figure 2. After finding these values for each year 
+                  it is a fairly straightforward calculation to go from an individual player's WAR to how many dollars they're valued at. Multiplying the 
+                  $/WAR value for the appropriate season by the individual player's WAR for that same season leaves you with a unit of dollars. For example, 
+                  the $/WAR value for the 2021-22 season was approximately 4.9 million. If a player posted 4 WAR during the 2021-22 season they would be 
+                  worth 19.6 million dollars.
+                </p> 
+                <p class="text-right">
+                  After using this process to estimate a player's value for a season, I decided to add a couple more ways of estimating a player's 
+                  value. I created two additional columns to hold a player's 3 year average dollar value and a player's long run average dollar value. 
+                  The long run (LR) average is at most nine years, but if a player has not played nine years then it encompasses their entire career. 
+                  The benefit of the LR estimate is that there is a huge sample size, so the top 10 is a who's who of the best players in the NBA. The 
+                  downside of this measure is that it takes into account data that is not recent. The single year estimate flips those strengths and weaknesses. 
+                  It provides a very recent and up to date estimate, but there is a smaller sample size so you are more susceptible to overweighting outlier seasons. 
+                  As a result the method of estimating that I chose to use was the 3 year average, as I think it finds the middle ground between having a good 
+                  sample size and having recent data. To attempt to find undervalued and overvalued players I subtracted a player's salary from the 3 year average estimated 
+                  value to find the difference between the two. Players with positive differences are undervalued while players with negative differences are overvalued. 
+                  The results can be seen in the table in the next section.
+                </p>
+            </div>
+        </div>
+
+        <!-- Third row (Table) -->
+        <div class="container-xxl mb-5 mt-5" id="valuation">
+            <div class="row justify-content-center align-items-center">
+                <h6 class="display-6 text-center">Player Valuation Post 2021-22 NBA Season</h6>
+                <p class="text-center mt-2">*Players must have played at least 820 minutes to be listed in the table*</p>
+                <div class="table-responsive">
+                <!-- table containing data -->
+                  <table class="dataframe table table-togglable" id="main-table">
+                    <thead>
+                      <tr style="text-align: right;">
+                        <th></th>
+                        <th>Name</th>
+                        <th>Team</th>
+                        <th>MP</th>
+                        <th>Raptor O</th>
+                        <th>Raptor D</th>
+                        <th>WAR</th>
+                        <th>Salary</th>
+                        <th>Estimated Value</th>
+                        <th>3 Year Average</th>
+                        <th>Long Run Average</th>
+                        <th>Diff</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th>1275</th>
+                        <td>Nikola Jokic</td>
+                        <td>DEN</td>
+                        <td>2476</td>
+                        <td>8.87</td>
+                        <td>6.00</td>
+                        <td>22.69</td>
+                        <td>31044906.00</td>
+                        <td>111762244.31</td>
+                        <td>80403015.23</td>
+                        <td>57580946.00</td>
+                        <td>49358109.23</td>
+                      </tr>
+                      <tr>
+                        <th>648</th>
+                        <td>Luka Doncic</td>
+                        <td>DAL</td>
+                        <td>2301</td>
+                        <td>5.68</td>
+                        <td>0.04</td>
+                        <td>10.09</td>
+                        <td>10174391.00</td>
+                        <td>49692099.85</td>
+                        <td>49189654.50</td>
+                        <td>43273248.43</td>
+                        <td>39015263.50</td>
+                      </tr>
+                      <tr>
+                        <th>2425</th>
+                        <td>Trae Young</td>
+                        <td>ATL</td>
+                        <td>2652</td>
+                        <td>7.62</td>
+                        <td>-3.20</td>
+                        <td>9.90</td>
+                        <td>8326471.00</td>
+                        <td>48774286.11</td>
+                        <td>37663782.54</td>
+                        <td>29125851.99</td>
+                        <td>29337311.54</td>
+                      </tr>
+                      <tr>
+                        <th>328</th>
+                        <td>Mikal Bridges</td>
+                        <td>PHO</td>
+                        <td>2854</td>
+                        <td>1.74</td>
+                        <td>0.91</td>
+                        <td>7.84</td>
+                        <td>5557725.00</td>
+                        <td>38591739.07</td>
+                        <td>32770608.26</td>
+                        <td>28458733.01</td>
+                        <td>27212883.26</td>
+                      </tr>
+                      <tr>
+                        <th>865</th>
+                        <td>Rudy Gobert</td>
+                        <td>UTA</td>
+                        <td>2120</td>
+                        <td>0.07</td>
+                        <td>7.12</td>
+                        <td>10.75</td>
+                        <td>35344828.00</td>
+                        <td>52952242.18</td>
+                        <td>56804852.99</td>
+                        <td>35868985.10</td>
+                        <td>21460024.99</td>
+                      </tr>
+                      <tr>
+                        <th>1861</th>
+                        <td>Jakob Poeltl</td>
+                        <td>SAS</td>
+                        <td>1970</td>
+                        <td>1.64</td>
+                        <td>2.39</td>
+                        <td>6.80</td>
+                        <td>8750000.00</td>
+                        <td>33471565.08</td>
+                        <td>29647098.48</td>
+                        <td>19970192.35</td>
+                        <td>20897098.48</td>
+                      </tr>
+                      <tr>
+                        <th>2148</th>
+                        <td>Jayson Tatum</td>
+                        <td>BOS</td>
+                        <td>2731</td>
+                        <td>4.85</td>
+                        <td>1.87</td>
+                        <td>13.20</td>
+                        <td>28103500.00</td>
+                        <td>65026020.79</td>
+                        <td>48078810.69</td>
+                        <td>36904592.27</td>
+                        <td>19975310.69</td>
+                      </tr>
+                      <tr>
+                        <th>2297</th>
+                        <td>Franz Wagner</td>
+                        <td>ORL</td>
+                        <td>2429</td>
+                        <td>0.47</td>
+                        <td>0.84</td>
+                        <td>5.03</td>
+                        <td>5007840.00</td>
+                        <td>24793817.44</td>
+                        <td>24793817.44</td>
+                        <td>24793817.44</td>
+                        <td>19785977.44</td>
+                      </tr>
+                      <tr>
+                        <th>1909</th>
+                        <td>Immanuel Quickley</td>
+                        <td>NYK</td>
+                        <td>1802</td>
+                        <td>2.36</td>
+                        <td>1.54</td>
+                        <td>6.03</td>
+                        <td>2210640.00</td>
+                        <td>29709943.69</td>
+                        <td>20936684.69</td>
+                        <td>20936684.69</td>
+                        <td>18726044.69</td>
+                      </tr>
+                      <tr>
+                        <th>365</th>
+                        <td>Jalen Brunson</td>
+                        <td>DAL</td>
+                        <td>2524</td>
+                        <td>2.33</td>
+                        <td>-0.58</td>
+                        <td>5.70</td>
+                        <td>1802057.00</td>
+                        <td>28063210.20</td>
+                        <td>20342255.83</td>
+                        <td>17147799.04</td>
+                        <td>18540198.83</td>
+                      </tr>
+                      <tr>
+                        <th>2267</th>
+                        <td>Fred VanVleet</td>
+                        <td>TOR</td>
+                        <td>2462</td>
+                        <td>3.40</td>
+                        <td>1.33</td>
+                        <td>9.39</td>
+                        <td>19675926.00</td>
+                        <td>46264951.09</td>
+                        <td>37229685.90</td>
+                        <td>24355619.98</td>
+                        <td>17553759.90</td>
+                      </tr>
+                      <tr>
+                        <th>140</th>
+                        <td>Desmond Bane</td>
+                        <td>MEM</td>
+                        <td>2266</td>
+                        <td>2.66</td>
+                        <td>0.56</td>
+                        <td>6.87</td>
+                        <td>2033160.00</td>
+                        <td>33836838.86</td>
+                        <td>19411482.26</td>
+                        <td>19411482.26</td>
+                        <td>17378322.26</td>
+                      </tr>
+                      <tr>
+                        <th>85</th>
+                        <td>Giannis Antetokounmpo</td>
+                        <td>MIL</td>
+                        <td>2204</td>
+                        <td>5.67</td>
+                        <td>2.08</td>
+                        <td>12.00</td>
+                        <td>39344900.00</td>
+                        <td>59117547.00</td>
+                        <td>56485698.70</td>
+                        <td>36635234.66</td>
+                        <td>17140798.70</td>
+                      </tr>
+                      <tr>
+                        <th>1783</th>
+                        <td>Royce O'Neale</td>
+                        <td>UTA</td>
+                        <td>2406</td>
+                        <td>0.41</td>
+                        <td>1.08</td>
+                        <td>5.20</td>
+                        <td>8800000.00</td>
+                        <td>25633081.31</td>
+                        <td>25589085.47</td>
+                        <td>19701248.84</td>
+                        <td>16789085.47</td>
+                      </tr>
+                      <tr>
+                        <th>755</th>
+                        <td>Dorian Finney-Smith</td>
+                        <td>DAL</td>
+                        <td>2644</td>
+                        <td>0.46</td>
+                        <td>0.30</td>
+                        <td>4.67</td>
+                        <td>4000000.00</td>
+                        <td>22996364.30</td>
+                        <td>20624374.35</td>
+                        <td>12642516.00</td>
+                        <td>16624374.35</td>
+                      </tr>
+                      <tr>
+                        <th>976</th>
+                        <td>Montrezl Harrell</td>
+                        <td>WAS</td>
+                        <td>1117</td>
+                        <td>2.20</td>
+                        <td>1.03</td>
+                        <td>3.38</td>
+                        <td>9720900.00</td>
+                        <td>16664907.96</td>
+                        <td>26333357.48</td>
+                        <td>17067816.32</td>
+                        <td>16612457.48</td>
+                      </tr>
+                      <tr>
+                        <th>2210</th>
+                        <td>Matisse Thybulle</td>
+                        <td>PHI</td>
+                        <td>1685</td>
+                        <td>-2.19</td>
+                        <td>4.15</td>
+                        <td>4.05</td>
+                        <td>2840160.00</td>
+                        <td>19950923.00</td>
+                        <td>18796457.29</td>
+                        <td>18796457.29</td>
+                        <td>15956297.29</td>
+                      </tr>
+                      <tr>
+                        <th>54</th>
+                        <td>Jose Alvarado</td>
+                        <td>NOP</td>
+                        <td>834</td>
+                        <td>1.01</td>
+                        <td>4.74</td>
+                        <td>3.61</td>
+                        <td>1925406.00</td>
+                        <td>17781065.46</td>
+                        <td>17781065.46</td>
+                        <td>17781065.46</td>
+                        <td>15855659.46</td>
+                      </tr>
+                      <tr>
+                        <th>1963</th>
+                        <td>Mitchell Robinson</td>
+                        <td>NYK</td>
+                        <td>1848</td>
+                        <td>0.46</td>
+                        <td>2.44</td>
+                        <td>5.28</td>
+                        <td>1802057.00</td>
+                        <td>25997901.59</td>
+                        <td>17420596.91</td>
+                        <td>15283053.56</td>
+                        <td>15618539.91</td>
+                      </tr>
+                      <tr>
+                        <th>159</th>
+                        <td>Scottie Barnes</td>
+                        <td>TOR</td>
+                        <td>2617</td>
+                        <td>-0.01</td>
+                        <td>0.75</td>
+                        <td>4.64</td>
+                        <td>7280400.00</td>
+                        <td>22837801.62</td>
+                        <td>22837801.62</td>
+                        <td>22837801.62</td>
+                        <td>15557401.62</td>
+                      </tr>
+                      <tr>
+                        <th>958</th>
+                        <td>Tyrese Haliburton</td>
+                        <td>SAC</td>
+                        <td>1757</td>
+                        <td>2.37</td>
+                        <td>-0.63</td>
+                        <td>4.01</td>
+                        <td>4023600.00</td>
+                        <td>19739047.73</td>
+                        <td>19311469.36</td>
+                        <td>19311469.36</td>
+                        <td>15287869.36</td>
+                      </tr>
+                      <tr>
+                        <th>957</th>
+                        <td>Tyrese Haliburton</td>
+                        <td>IND</td>
+                        <td>938</td>
+                        <td>3.50</td>
+                        <td>-1.88</td>
+                        <td>2.10</td>
+                        <td>4023600.00</td>
+                        <td>10362887.42</td>
+                        <td>19311469.36</td>
+                        <td>19311469.36</td>
+                        <td>15287869.36</td>
+                      </tr>
+                      <tr>
+                        <th>852</th>
+                        <td>Shai Gilgeous-Alexander</td>
+                        <td>OKC</td>
+                        <td>1942</td>
+                        <td>2.75</td>
+                        <td>-0.88</td>
+                        <td>4.60</td>
+                        <td>5495532.00</td>
+                        <td>22652799.84</td>
+                        <td>20564479.55</td>
+                        <td>17681424.68</td>
+                        <td>15068947.55</td>
+                      </tr>
+                      <tr>
+                        <th>1923</th>
+                        <td>Austin Reaves</td>
+                        <td>LAL</td>
+                        <td>1418</td>
+                        <td>0.00</td>
+                        <td>1.69</td>
+                        <td>3.20</td>
+                        <td>925258.00</td>
+                        <td>15763601.00</td>
+                        <td>15763601.00</td>
+                        <td>15763601.00</td>
+                        <td>14838343.00</td>
+                      </tr>
+                      <tr>
+                        <th>719</th>
+                        <td>Joel Embiid</td>
+                        <td>PHI</td>
+                        <td>2297</td>
+                        <td>4.22</td>
+                        <td>3.80</td>
+                        <td>12.70</td>
+                        <td>31579390.00</td>
+                        <td>62523599.29</td>
+                        <td>45756083.54</td>
+                        <td>36042722.87</td>
+                        <td>14176693.54</td>
+                      </tr>
+                      <tr>
+                        <th>2143</th>
+                        <td>Jae'Sean Tate</td>
+                        <td>HOU</td>
+                        <td>2056</td>
+                        <td>-1.31</td>
+                        <td>0.78</td>
+                        <td>2.34</td>
+                        <td>1517981.00</td>
+                        <td>11510859.21</td>
+                        <td>15523592.02</td>
+                        <td>15523592.02</td>
+                        <td>14005611.02</td>
+                      </tr>
+                      <tr>
+                        <th>423</th>
+                        <td>Clint Capela</td>
+                        <td>ATL</td>
+                        <td>2042</td>
+                        <td>0.72</td>
+                        <td>2.02</td>
+                        <td>5.69</td>
+                        <td>17603448.00</td>
+                        <td>28038845.09</td>
+                        <td>31205589.30</td>
+                        <td>20576917.36</td>
+                        <td>13602141.30</td>
+                      </tr>
+                      <tr>
+                        <th>2354</th>
+                        <td>Hassan Whiteside</td>
+                        <td>UTA</td>
+                        <td>1162</td>
+                        <td>1.08</td>
+                        <td>2.24</td>
+                        <td>3.60</td>
+                        <td>2401537.00</td>
+                        <td>17706234.42</td>
+                        <td>15305925.66</td>
+                        <td>14820582.73</td>
+                        <td>12904388.66</td>
+                      </tr>
+                      <tr>
+                        <th>131</th>
+                        <td>LaMelo Ball</td>
+                        <td>CHA</td>
+                        <td>2422</td>
+                        <td>2.71</td>
+                        <td>-0.66</td>
+                        <td>6.07</td>
+                        <td>8231760.00</td>
+                        <td>29915017.21</td>
+                        <td>21085065.95</td>
+                        <td>21085065.95</td>
+                        <td>12853305.95</td>
+                      </tr>
+                      <tr>
+                        <th>2347</th>
+                        <td>Derrick White</td>
+                        <td>SAS</td>
+                        <td>1486</td>
+                        <td>1.06</td>
+                        <td>3.53</td>
+                        <td>5.58</td>
+                        <td>15678571.00</td>
+                        <td>27470183.52</td>
+                        <td>28051101.12</td>
+                        <td>21827984.31</td>
+                        <td>12372530.12</td>
+                      </tr>
+                      <tr>
+                        <th>532</th>
+                        <td>Robert Covington</td>
+                        <td>POR</td>
+                        <td>1431</td>
+                        <td>-2.09</td>
+                        <td>2.87</td>
+                        <td>2.59</td>
+                        <td>12975471.00</td>
+                        <td>12746566.08</td>
+                        <td>25291907.33</td>
+                        <td>18866159.04</td>
+                        <td>12316436.33</td>
+                      </tr>
+                      <tr>
+                        <th>2094</th>
+                        <td>Marcus Smart</td>
+                        <td>BOS</td>
+                        <td>2296</td>
+                        <td>1.23</td>
+                        <td>2.00</td>
+                        <td>7.10</td>
+                        <td>13839285.00</td>
+                        <td>34966025.31</td>
+                        <td>26085146.77</td>
+                        <td>19062586.35</td>
+                        <td>12245861.77</td>
+                      </tr>
+                      <tr>
+                        <th>1241</th>
+                        <td>Cameron Johnson</td>
+                        <td>PHO</td>
+                        <td>1730</td>
+                        <td>0.98</td>
+                        <td>1.97</td>
+                        <td>5.05</td>
+                        <td>4437000.00</td>
+                        <td>24854271.31</td>
+                        <td>16273942.72</td>
+                        <td>16273942.72</td>
+                        <td>11836942.72</td>
+                      </tr>
+                      <tr>
+                        <th>2440</th>
+                        <td>Ivica Zubac</td>
+                        <td>LAC</td>
+                        <td>1852</td>
+                        <td>-0.69</td>
+                        <td>0.72</td>
+                        <td>2.63</td>
+                        <td>7518518.00</td>
+                        <td>12937181.15</td>
+                        <td>19039936.15</td>
+                        <td>10000328.78</td>
+                        <td>11521418.15</td>
+                      </tr>
+                      <tr>
+                        <th>445</th>
+                        <td>Alex Caruso</td>
+                        <td>CHI</td>
+                        <td>1147</td>
+                        <td>0.34</td>
+                        <td>4.79</td>
+                        <td>4.62</td>
+                        <td>8600000.00</td>
+                        <td>22743682.20</td>
+                        <td>20079752.21</td>
+                        <td>14227967.47</td>
+                        <td>11479752.21</td>
+                      </tr>
+                      <tr>
+                        <th>908</th>
+                        <td>Danny Green</td>
+                        <td>PHI</td>
+                        <td>1353</td>
+                        <td>-0.35</td>
+                        <td>1.24</td>
+                        <td>2.51</td>
+                        <td>10000000.00</td>
+                        <td>12381804.50</td>
+                        <td>21395682.43</td>
+                        <td>21333735.04</td>
+                        <td>11395682.43</td>
+                      </tr>
+                      <tr>
+                        <th>1527</th>
+                        <td>Garrison Mathews</td>
+                        <td>HOU</td>
+                        <td>1712</td>
+                        <td>1.09</td>
+                        <td>1.95</td>
+                        <td>5.08</td>
+                        <td>2000000.00</td>
+                        <td>25019199.58</td>
+                        <td>13215469.11</td>
+                        <td>13215469.11</td>
+                        <td>11215469.11</td>
+                      </tr>
+                      <tr>
+                        <th>2257</th>
+                        <td>Jonas Valanciunas</td>
+                        <td>NOP</td>
+                        <td>2240</td>
+                        <td>0.78</td>
+                        <td>0.84</td>
+                        <td>4.97</td>
+                        <td>14000000.00</td>
+                        <td>24457981.77</td>
+                        <td>25154048.60</td>
+                        <td>15366818.40</td>
+                        <td>11154048.60</td>
+                      </tr>
+                      <tr>
+                        <th>475</th>
+                        <td>Brandon Clarke</td>
+                        <td>MEM</td>
+                        <td>1246</td>
+                        <td>1.58</td>
+                        <td>1.31</td>
+                        <td>3.58</td>
+                        <td>2726880.00</td>
+                        <td>17654905.47</td>
+                        <td>13760585.45</td>
+                        <td>13760585.45</td>
+                        <td>11033705.45</td>
+                      </tr>
+                      <tr>
+                        <th>653</th>
+                        <td>Luguentz Dort</td>
+                        <td>OKC</td>
+                        <td>1665</td>
+                        <td>-1.40</td>
+                        <td>1.19</td>
+                        <td>2.17</td>
+                        <td>1782621.00</td>
+                        <td>10706642.87</td>
+                        <td>12701345.83</td>
+                        <td>12701345.83</td>
+                        <td>10918724.83</td>
+                      </tr>
+                      <tr>
+                        <th>486</th>
+                        <td>Jordan Clarkson</td>
+                        <td>UTA</td>
+                        <td>2141</td>
+                        <td>2.45</td>
+                        <td>-0.24</td>
+                        <td>5.38</td>
+                        <td>12420000.00</td>
+                        <td>26503257.98</td>
+                        <td>23046432.27</td>
+                        <td>12697125.70</td>
+                        <td>10626432.27</td>
+                      </tr>
+                      <tr>
+                        <th>1142</th>
+                        <td>Bones Hyland</td>
+                        <td>DEN</td>
+                        <td>1310</td>
+                        <td>2.28</td>
+                        <td>-1.17</td>
+                        <td>2.58</td>
+                        <td>2096880.00</td>
+                        <td>12705726.91</td>
+                        <td>12705726.91</td>
+                        <td>12705726.91</td>
+                        <td>10608846.91</td>
+                      </tr>
+                      <tr>
+                        <th>678</th>
+                        <td>Andre Drummond</td>
+                        <td>PHI</td>
+                        <td>902</td>
+                        <td>-1.84</td>
+                        <td>3.74</td>
+                        <td>2.16</td>
+                        <td>2401537.00</td>
+                        <td>10622211.78</td>
+                        <td>12922265.31</td>
+                        <td>14394786.93</td>
+                        <td>10520728.31</td>
+                      </tr>
+                      <tr>
+                        <th>385</th>
+                        <td>Alec Burks</td>
+                        <td>NYK</td>
+                        <td>2318</td>
+                        <td>1.07</td>
+                        <td>1.44</td>
+                        <td>6.17</td>
+                        <td>9536000.00</td>
+                        <td>30392623.59</td>
+                        <td>19932268.50</td>
+                        <td>8132141.00</td>
+                        <td>10396268.50</td>
+                      </tr>
+                      <tr>
+                        <th>1520</th>
+                        <td>Cody Martin</td>
+                        <td>CHA</td>
+                        <td>1866</td>
+                        <td>0.32</td>
+                        <td>0.95</td>
+                        <td>3.79</td>
+                        <td>1782621.00</td>
+                        <td>18683639.08</td>
+                        <td>12153239.55</td>
+                        <td>12153239.55</td>
+                        <td>10370618.55</td>
+                      </tr>
+                      <tr>
+                        <th>415</th>
+                        <td>Facundo Campazzo</td>
+                        <td>DEN</td>
+                        <td>1184</td>
+                        <td>-2.36</td>
+                        <td>1.58</td>
+                        <td>1.19</td>
+                        <td>3100000.00</td>
+                        <td>5846722.89</td>
+                        <td>13031455.38</td>
+                        <td>13031455.38</td>
+                        <td>9931455.38</td>
+                      </tr>
+                      <tr>
+                        <th>332</th>
+                        <td>Miles Bridges</td>
+                        <td>CHA</td>
+                        <td>2837</td>
+                        <td>1.74</td>
+                        <td>-0.05</td>
+                        <td>6.43</td>
+                        <td>5421493.00</td>
+                        <td>31672137.06</td>
+                        <td>15348201.21</td>
+                        <td>11885928.93</td>
+                        <td>9926708.21</td>
+                      </tr>
+                      <tr>
+                        <th>2404</th>
+                        <td>Delon Wright</td>
+                        <td>ATL</td>
+                        <td>1452</td>
+                        <td>-0.84</td>
+                        <td>2.48</td>
+                        <td>3.20</td>
+                        <td>8526316.00</td>
+                        <td>15759547.27</td>
+                        <td>18352126.56</td>
+                        <td>14058121.05</td>
+                        <td>9825810.56</td>
+                      </tr>
+                      <tr>
+                        <th>1873</th>
+                        <td>Bobby Portis</td>
+                        <td>MIL</td>
+                        <td>2028</td>
+                        <td>0.77</td>
+                        <td>1.07</td>
+                        <td>4.73</td>
+                        <td>4347600.00</td>
+                        <td>23308676.37</td>
+                        <td>14162338.97</td>
+                        <td>5974559.64</td>
+                        <td>9814738.97</td>
+                      </tr>
+                      <tr>
+                        <th>2379</th>
+                        <td>Kenrich Williams</td>
+                        <td>OKC</td>
+                        <td>1072</td>
+                        <td>-1.21</td>
+                        <td>3.77</td>
+                        <td>2.89</td>
+                        <td>2000000.00</td>
+                        <td>14236692.24</td>
+                        <td>11809737.89</td>
+                        <td>10164632.18</td>
+                        <td>9809737.89</td>
+                      </tr>
+                      <tr>
+                        <th>1007</th>
+                        <td>Isaiah Hartenstein</td>
+                        <td>LAC</td>
+                        <td>1216</td>
+                        <td>1.20</td>
+                        <td>1.51</td>
+                        <td>3.41</td>
+                        <td>1729217.00</td>
+                        <td>16809219.52</td>
+                        <td>11330536.48</td>
+                        <td>7708653.14</td>
+                        <td>9601319.48</td>
+                      </tr>
+                      <tr>
+                        <th>351</th>
+                        <td>Bruce Brown</td>
+                        <td>BRK</td>
+                        <td>1774</td>
+                        <td>0.26</td>
+                        <td>0.57</td>
+                        <td>3.23</td>
+                        <td>4736102.00</td>
+                        <td>15899770.27</td>
+                        <td>14167988.09</td>
+                        <td>12595212.69</td>
+                        <td>9431886.09</td>
+                      </tr>
+                      <tr>
+                        <th>1091</th>
+                        <td>Jrue Holiday</td>
+                        <td>MIL</td>
+                        <td>2207</td>
+                        <td>3.94</td>
+                        <td>1.60</td>
+                        <td>9.34</td>
+                        <td>31171333.00</td>
+                        <td>46019764.23</td>
+                        <td>40562446.37</td>
+                        <td>28457784.13</td>
+                        <td>9391113.37</td>
+                      </tr>
+                      <tr>
+                        <th>1536</th>
+                        <td>Wesley Matthews</td>
+                        <td>MIL</td>
+                        <td>1002</td>
+                        <td>-1.63</td>
+                        <td>2.59</td>
+                        <td>1.89</td>
+                        <td>1958495.00</td>
+                        <td>9315218.29</td>
+                        <td>11029326.24</td>
+                        <td>12479808.05</td>
+                        <td>9070831.24</td>
+                      </tr>
+                      <tr>
+                        <th>310</th>
+                        <td>Chris Boucher</td>
+                        <td>TOR</td>
+                        <td>1690</td>
+                        <td>-0.21</td>
+                        <td>0.94</td>
+                        <td>2.98</td>
+                        <td>7020000.00</td>
+                        <td>14691165.43</td>
+                        <td>15752175.49</td>
+                        <td>9491612.86</td>
+                        <td>8732175.49</td>
+                      </tr>
+                      <tr>
+                        <th>555</th>
+                        <td>Jae Crowder</td>
+                        <td>PHO</td>
+                        <td>1886</td>
+                        <td>-0.29</td>
+                        <td>1.93</td>
+                        <td>4.24</td>
+                        <td>9720900.00</td>
+                        <td>20866515.51</td>
+                        <td>18449265.46</td>
+                        <td>14283092.97</td>
+                        <td>8728365.46</td>
+                      </tr>
+                      <tr>
+                        <th>1714</th>
+                        <td>Raul Neto</td>
+                        <td>WAS</td>
+                        <td>1372</td>
+                        <td>-0.45</td>
+                        <td>-0.71</td>
+                        <td>1.11</td>
+                        <td>2089448.00</td>
+                        <td>5446332.22</td>
+                        <td>10736342.11</td>
+                        <td>7384186.81</td>
+                        <td>8646894.11</td>
+                      </tr>
+                      <tr>
+                        <th>1595</th>
+                        <td>De'Anthony Melton</td>
+                        <td>MEM</td>
+                        <td>1657</td>
+                        <td>0.67</td>
+                        <td>2.07</td>
+                        <td>4.70</td>
+                        <td>8805976.00</td>
+                        <td>23136885.38</td>
+                        <td>17247378.68</td>
+                        <td>13265025.99</td>
+                        <td>8441402.68</td>
+                      </tr>
+                      <tr>
+                        <th>258</th>
+                        <td>Nemanja Bjelica</td>
+                        <td>GSW</td>
+                        <td>1142</td>
+                        <td>-0.89</td>
+                        <td>1.88</td>
+                        <td>2.19</td>
+                        <td>2089448.00</td>
+                        <td>10772639.93</td>
+                        <td>10391096.54</td>
+                        <td>10420081.81</td>
+                        <td>8301648.54</td>
+                      </tr>
+                      <tr>
+                        <th>2262</th>
+                        <td>Jarred Vanderbilt</td>
+                        <td>MIN</td>
+                        <td>1880</td>
+                        <td>0.19</td>
+                        <td>1.86</td>
+                        <td>4.60</td>
+                        <td>4050000.00</td>
+                        <td>22635576.95</td>
+                        <td>12144073.14</td>
+                        <td>9238340.77</td>
+                        <td>8094073.14</td>
+                      </tr>
+                      <tr>
+                        <th>1517</th>
+                        <td>Caleb Martin</td>
+                        <td>MIA</td>
+                        <td>1372</td>
+                        <td>-0.06</td>
+                        <td>2.60</td>
+                        <td>3.69</td>
+                        <td>844011.00</td>
+                        <td>18172541.93</td>
+                        <td>8726863.33</td>
+                        <td>8726863.33</td>
+                        <td>7882852.33</td>
+                      </tr>
+                      <tr>
+                        <th>1506</th>
+                        <td>Terance Mann</td>
+                        <td>LAC</td>
+                        <td>2317</td>
+                        <td>-0.14</td>
+                        <td>0.65</td>
+                        <td>3.82</td>
+                        <td>1782621.00</td>
+                        <td>18804852.04</td>
+                        <td>9417892.70</td>
+                        <td>9417892.70</td>
+                        <td>7635271.70</td>
+                      </tr>
+                      <tr>
+                        <th>679</th>
+                        <td>Chris Duarte</td>
+                        <td>IND</td>
+                        <td>1541</td>
+                        <td>-0.76</td>
+                        <td>0.95</td>
+                        <td>2.31</td>
+                        <td>3749400.00</td>
+                        <td>11382444.49</td>
+                        <td>11382444.49</td>
+                        <td>11382444.49</td>
+                        <td>7633044.49</td>
+                      </tr>
+                      <tr>
+                        <th>1069</th>
+                        <td>George Hill</td>
+                        <td>MIL</td>
+                        <td>1253</td>
+                        <td>-0.93</td>
+                        <td>1.74</td>
+                        <td>2.25</td>
+                        <td>5275491.00</td>
+                        <td>11068322.92</td>
+                        <td>12853208.87</td>
+                        <td>13205997.64</td>
+                        <td>7577717.87</td>
+                      </tr>
+                      <tr>
+                        <th>1044</th>
+                        <td>Tyler Herro</td>
+                        <td>MIA</td>
+                        <td>2151</td>
+                        <td>2.08</td>
+                        <td>-0.69</td>
+                        <td>4.55</td>
+                        <td>4004280.00</td>
+                        <td>22406741.98</td>
+                        <td>11519374.54</td>
+                        <td>11519374.54</td>
+                        <td>7515094.54</td>
+                      </tr>
+                      <tr>
+                        <th>1098</th>
+                        <td>Justin Holiday</td>
+                        <td>IND</td>
+                        <td>1416</td>
+                        <td>-0.65</td>
+                        <td>-1.66</td>
+                        <td>0.32</td>
+                        <td>6006420.00</td>
+                        <td>1566234.91</td>
+                        <td>13438544.55</td>
+                        <td>9474925.63</td>
+                        <td>7432124.55</td>
+                      </tr>
+                      <tr>
+                        <th>518</th>
+                        <td>Pat Connaughton</td>
+                        <td>MIL</td>
+                        <td>1691</td>
+                        <td>0.55</td>
+                        <td>0.02</td>
+                        <td>2.85</td>
+                        <td>5333334.00</td>
+                        <td>14039244.08</td>
+                        <td>12474637.83</td>
+                        <td>7213670.07</td>
+                        <td>7141303.83</td>
+                      </tr>
+                      <tr>
+                        <th>513</th>
+                        <td>Mike Conley</td>
+                        <td>UTA</td>
+                        <td>2058</td>
+                        <td>2.56</td>
+                        <td>1.48</td>
+                        <td>7.09</td>
+                        <td>21000000.00</td>
+                        <td>34901142.31</td>
+                        <td>28078069.46</td>
+                        <td>23873169.70</td>
+                        <td>7078069.46</td>
+                      </tr>
+                      <tr>
+                        <th>1836</th>
+                        <td>Gary Payton II</td>
+                        <td>GSW</td>
+                        <td>1247</td>
+                        <td>0.97</td>
+                        <td>4.24</td>
+                        <td>5.06</td>
+                        <td>1669178.00</td>
+                        <td>24942575.99</td>
+                        <td>8610464.29</td>
+                        <td>4091118.51</td>
+                        <td>6941286.29</td>
+                      </tr>
+                      <tr>
+                        <th>828</th>
+                        <td>Rudy Gay</td>
+                        <td>UTA</td>
+                        <td>1038</td>
+                        <td>-0.15</td>
+                        <td>0.76</td>
+                        <td>1.78</td>
+                        <td>5890000.00</td>
+                        <td>8764452.06</td>
+                        <td>12826117.21</td>
+                        <td>13300903.69</td>
+                        <td>6936117.21</td>
+                      </tr>
+                      <tr>
+                        <th>120</th>
+                        <td>Deni Avdija</td>
+                        <td>WAS</td>
+                        <td>1984</td>
+                        <td>-0.91</td>
+                        <td>2.03</td>
+                        <td>3.91</td>
+                        <td>4692840.00</td>
+                        <td>19277303.25</td>
+                        <td>11253135.93</td>
+                        <td>11253135.93</td>
+                        <td>6560295.93</td>
+                      </tr>
+                      <tr>
+                        <th>2020</th>
+                        <td>Domantas Sabonis</td>
+                        <td>IND</td>
+                        <td>1632</td>
+                        <td>1.82</td>
+                        <td>2.58</td>
+                        <td>5.97</td>
+                        <td>18500000.00</td>
+                        <td>29423127.05</td>
+                        <td>25026281.21</td>
+                        <td>16334906.43</td>
+                        <td>6526281.21</td>
+                      </tr>
+                      <tr>
+                        <th>1254</th>
+                        <td>Keldon Johnson</td>
+                        <td>SAS</td>
+                        <td>2392</td>
+                        <td>1.31</td>
+                        <td>-0.41</td>
+                        <td>4.46</td>
+                        <td>2145720.00</td>
+                        <td>21946364.99</td>
+                        <td>8647519.72</td>
+                        <td>8647519.72</td>
+                        <td>6501799.72</td>
+                      </tr>
+                      <tr>
+                        <th>1693</th>
+                        <td>Dejounte Murray</td>
+                        <td>SAS</td>
+                        <td>2366</td>
+                        <td>3.05</td>
+                        <td>-0.05</td>
+                        <td>6.98</td>
+                        <td>15428880.00</td>
+                        <td>34366670.74</td>
+                        <td>21823842.10</td>
+                        <td>15442366.46</td>
+                        <td>6394962.10</td>
+                      </tr>
+                      <tr>
+                        <th>1401</th>
+                        <td>Damion Lee</td>
+                        <td>GSW</td>
+                        <td>1256</td>
+                        <td>-2.10</td>
+                        <td>-0.05</td>
+                        <td>0.39</td>
+                        <td>1910860.00</td>
+                        <td>1900495.68</td>
+                        <td>8001829.09</td>
+                        <td>5596464.43</td>
+                        <td>6090969.09</td>
+                      </tr>
+                      <tr>
+                        <th>1828</th>
+                        <td>Cameron Payne</td>
+                        <td>PHO</td>
+                        <td>1278</td>
+                        <td>0.24</td>
+                        <td>0.82</td>
+                        <td>2.49</td>
+                        <td>6500000.00</td>
+                        <td>12274990.01</td>
+                        <td>12469367.52</td>
+                        <td>5434003.57</td>
+                        <td>5969367.52</td>
+                      </tr>
+                      <tr>
+                        <th>2131</th>
+                        <td>Isaiah Stewart</td>
+                        <td>DET</td>
+                        <td>1816</td>
+                        <td>-3.14</td>
+                        <td>0.83</td>
+                        <td>0.41</td>
+                        <td>3277080.00</td>
+                        <td>2024393.82</td>
+                        <td>9189536.52</td>
+                        <td>9189536.52</td>
+                        <td>5912456.52</td>
+                      </tr>
+                      <tr>
+                        <th>1572</th>
+                        <td>JaVale McGee</td>
+                        <td>PHO</td>
+                        <td>1172</td>
+                        <td>-0.24</td>
+                        <td>2.39</td>
+                        <td>2.95</td>
+                        <td>5000000.00</td>
+                        <td>14514706.78</td>
+                        <td>10884824.10</td>
+                        <td>5407155.14</td>
+                        <td>5884824.10</td>
+                      </tr>
+                      <tr>
+                        <th>1342</th>
+                        <td>John Konchar</td>
+                        <td>MEM</td>
+                        <td>1292</td>
+                        <td>0.50</td>
+                        <td>0.65</td>
+                        <td>2.56</td>
+                        <td>2200000.00</td>
+                        <td>12590917.24</td>
+                        <td>7993534.67</td>
+                        <td>7993534.67</td>
+                        <td>5793534.67</td>
+                      </tr>
+                      <tr>
+                        <th>786</th>
+                        <td>Daniel Gafford</td>
+                        <td>WAS</td>
+                        <td>1444</td>
+                        <td>0.37</td>
+                        <td>-0.68</td>
+                        <td>1.80</td>
+                        <td>1782621.00</td>
+                        <td>8840522.68</td>
+                        <td>7311420.97</td>
+                        <td>7311420.97</td>
+                        <td>5528799.97</td>
+                      </tr>
+                      <tr>
+                        <th>1907</th>
+                        <td>Payton Pritchard</td>
+                        <td>BOS</td>
+                        <td>1001</td>
+                        <td>1.42</td>
+                        <td>-0.30</td>
+                        <td>1.95</td>
+                        <td>2137440.00</td>
+                        <td>9625205.93</td>
+                        <td>7661388.84</td>
+                        <td>7661388.84</td>
+                        <td>5523948.84</td>
+                      </tr>
+                      <tr>
+                        <th>1826</th>
+                        <td>Chris Paul</td>
+                        <td>PHO</td>
+                        <td>2139</td>
+                        <td>4.11</td>
+                        <td>-0.46</td>
+                        <td>6.95</td>
+                        <td>30800000.00</td>
+                        <td>34208967.68</td>
+                        <td>36317088.25</td>
+                        <td>38753386.85</td>
+                        <td>5517088.25</td>
+                      </tr>
+                      <tr>
+                        <th>930</th>
+                        <td>Javonte Green</td>
+                        <td>CHI</td>
+                        <td>1519</td>
+                        <td>0.45</td>
+                        <td>1.28</td>
+                        <td>3.46</td>
+                        <td>1669178.00</td>
+                        <td>17023649.01</td>
+                        <td>7153485.34</td>
+                        <td>7153485.34</td>
+                        <td>5484307.34</td>
+                      </tr>
+                      <tr>
+                        <th>2133</th>
+                        <td>Max Strus</td>
+                        <td>MIA</td>
+                        <td>1587</td>
+                        <td>2.28</td>
+                        <td>-0.70</td>
+                        <td>3.50</td>
+                        <td>1669178.00</td>
+                        <td>17234423.10</td>
+                        <td>7092900.56</td>
+                        <td>7092900.56</td>
+                        <td>5423722.56</td>
+                      </tr>
+                      <tr>
+                        <th>1538</th>
+                        <td>Tyrese Maxey</td>
+                        <td>PHI</td>
+                        <td>2650</td>
+                        <td>1.33</td>
+                        <td>-1.60</td>
+                        <td>3.31</td>
+                        <td>2602920.00</td>
+                        <td>16278047.47</td>
+                        <td>7906246.86</td>
+                        <td>7906246.86</td>
+                        <td>5303326.86</td>
+                      </tr>
+                      <tr>
+                        <th>1172</th>
+                        <td>Joe Ingles</td>
+                        <td>UTA</td>
+                        <td>1122</td>
+                        <td>-0.21</td>
+                        <td>-1.11</td>
+                        <td>0.81</td>
+                        <td>13036364.00</td>
+                        <td>4009403.62</td>
+                        <td>18158389.75</td>
+                        <td>16934403.63</td>
+                        <td>5122025.75</td>
+                      </tr>
+                      <tr>
+                        <th>72</th>
+                        <td>Kyle Anderson</td>
+                        <td>MEM</td>
+                        <td>1484</td>
+                        <td>-1.58</td>
+                        <td>0.98</td>
+                        <td>1.63</td>
+                        <td>9937150.00</td>
+                        <td>8044688.63</td>
+                        <td>14984478.74</td>
+                        <td>10466087.05</td>
+                        <td>5047328.74</td>
+                      </tr>
+                      <tr>
+                        <th>39</th>
+                        <td>Grayson Allen</td>
+                        <td>MIL</td>
+                        <td>1805</td>
+                        <td>0.46</td>
+                        <td>-0.09</td>
+                        <td>2.87</td>
+                        <td>4054695.00</td>
+                        <td>14115070.73</td>
+                        <td>9056573.64</td>
+                        <td>5091184.23</td>
+                        <td>5001878.64</td>
+                      </tr>
+                      <tr>
+                        <th>396</th>
+                        <td>Jimmy Butler</td>
+                        <td>MIA</td>
+                        <td>1931</td>
+                        <td>3.33</td>
+                        <td>0.76</td>
+                        <td>6.70</td>
+                        <td>36016200.00</td>
+                        <td>33001260.11</td>
+                        <td>41014559.29</td>
+                        <td>35267663.54</td>
+                        <td>4998359.29</td>
+                      </tr>
+                      <tr>
+                        <th>35</th>
+                        <td>LaMarcus Aldridge</td>
+                        <td>BRK</td>
+                        <td>1050</td>
+                        <td>-0.24</td>
+                        <td>1.83</td>
+                        <td>2.32</td>
+                        <td>2641691.00</td>
+                        <td>11423107.21</td>
+                        <td>7630229.30</td>
+                        <td>17458251.19</td>
+                        <td>4988538.30</td>
+                      </tr>
+                      <tr>
+                        <th>1345</th>
+                        <td>Furkan Korkmaz</td>
+                        <td>PHI</td>
+                        <td>1414</td>
+                        <td>-1.05</td>
+                        <td>-1.02</td>
+                        <td>0.50</td>
+                        <td>4629630.00</td>
+                        <td>2444130.46</td>
+                        <td>9558327.55</td>
+                        <td>6677279.73</td>
+                        <td>4928697.55</td>
+                      </tr>
+                      <tr>
+                        <th>1654</th>
+                        <td>Ja Morant</td>
+                        <td>MEM</td>
+                        <td>1889</td>
+                        <td>4.56</td>
+                        <td>-1.50</td>
+                        <td>5.64</td>
+                        <td>9603360.00</td>
+                        <td>27778898.69</td>
+                        <td>14379239.24</td>
+                        <td>14379239.24</td>
+                        <td>4775879.24</td>
+                      </tr>
+                      <tr>
+                        <th>1134</th>
+                        <td>Kevin Huerter</td>
+                        <td>ATL</td>
+                        <td>2188</td>
+                        <td>0.49</td>
+                        <td>-0.87</td>
+                        <td>2.64</td>
+                        <td>4253357.00</td>
+                        <td>13019129.72</td>
+                        <td>8957956.39</td>
+                        <td>7831308.41</td>
+                        <td>4704599.39</td>
+                      </tr>
+                      <tr>
+                        <th>1717</th>
+                        <td>Georges Niang</td>
+                        <td>PHI</td>
+                        <td>1736</td>
+                        <td>0.16</td>
+                        <td>-1.35</td>
+                        <td>1.38</td>
+                        <td>3300000.00</td>
+                        <td>6801572.79</td>
+                        <td>7953478.55</td>
+                        <td>3552862.76</td>
+                        <td>4653478.55</td>
+                      </tr>
+                      <tr>
+                        <th>1454</th>
+                        <td>Kevon Looney</td>
+                        <td>GSW</td>
+                        <td>1732</td>
+                        <td>-0.45</td>
+                        <td>1.99</td>
+                        <td>3.76</td>
+                        <td>5178572.00</td>
+                        <td>18535276.51</td>
+                        <td>9573238.72</td>
+                        <td>8556245.27</td>
+                        <td>4394666.72</td>
+                      </tr>
+                      <tr>
+                        <th>44</th>
+                        <td>Jarrett Allen</td>
+                        <td>CLE</td>
+                        <td>1809</td>
+                        <td>0.19</td>
+                        <td>4.09</td>
+                        <td>6.46</td>
+                        <td>20000000.00</td>
+                        <td>31816255.30</td>
+                        <td>24278666.61</td>
+                        <td>12348723.30</td>
+                        <td>4278666.61</td>
+                      </tr>
+                      <tr>
+                        <th>803</th>
+                        <td>Darius Garland</td>
+                        <td>CLE</td>
+                        <td>2430</td>
+                        <td>4.77</td>
+                        <td>-0.27</td>
+                        <td>8.99</td>
+                        <td>7040880.00</td>
+                        <td>44280330.48</td>
+                        <td>11314606.38</td>
+                        <td>11314606.38</td>
+                        <td>4273726.38</td>
+                      </tr>
+                      <tr>
+                        <th>1996</th>
+                        <td>Terry Rozier</td>
+                        <td>CHA</td>
+                        <td>2458</td>
+                        <td>2.75</td>
+                        <td>0.24</td>
+                        <td>7.16</td>
+                        <td>17905263.00</td>
+                        <td>35252348.94</td>
+                        <td>22120744.60</td>
+                        <td>12804141.40</td>
+                        <td>4215481.60</td>
+                      </tr>
+                      <tr>
+                        <th>1130</th>
+                        <td>Dwight Howard</td>
+                        <td>LAL</td>
+                        <td>971</td>
+                        <td>-0.16</td>
+                        <td>-1.52</td>
+                        <td>0.53</td>
+                        <td>2641691.00</td>
+                        <td>2613377.70</td>
+                        <td>6808129.10</td>
+                        <td>6606566.72</td>
+                        <td>4166438.10</td>
+                      </tr>
+                      <tr>
+                        <th>240</th>
+                        <td>Patrick Beverley</td>
+                        <td>MIN</td>
+                        <td>1476</td>
+                        <td>1.93</td>
+                        <td>2.00</td>
+                        <td>5.03</td>
+                        <td>14320987.00</td>
+                        <td>24774192.61</td>
+                        <td>18140109.90</td>
+                        <td>16436255.63</td>
+                        <td>3819122.90</td>
+                      </tr>
+                      <tr>
+                        <th>1641</th>
+                        <td>Malik Monk</td>
+                        <td>LAL</td>
+                        <td>2139</td>
+                        <td>1.79</td>
+                        <td>-1.24</td>
+                        <td>3.61</td>
+                        <td>1789256.00</td>
+                        <td>17792083.84</td>
+                        <td>5507284.29</td>
+                        <td>722901.92</td>
+                        <td>3718028.29</td>
+                      </tr>
+                      <tr>
+                        <th>124</th>
+                        <td>Deandre Ayton</td>
+                        <td>PHO</td>
+                        <td>1713</td>
+                        <td>-0.68</td>
+                        <td>1.14</td>
+                        <td>2.80</td>
+                        <td>12632950.00</td>
+                        <td>13789280.50</td>
+                        <td>16281410.98</td>
+                        <td>12754681.40</td>
+                        <td>3648460.98</td>
+                      </tr>
+                      <tr>
+                        <th>2219</th>
+                        <td>Juan Toscano-Anderson</td>
+                        <td>GSW</td>
+                        <td>994</td>
+                        <td>-1.68</td>
+                        <td>1.05</td>
+                        <td>1.08</td>
+                        <td>1701593.00</td>
+                        <td>5297629.76</td>
+                        <td>5326074.25</td>
+                        <td>5326074.25</td>
+                        <td>3624481.25</td>
+                      </tr>
+                      <tr>
+                        <th>1956</th>
+                        <td>Duncan Robinson</td>
+                        <td>MIA</td>
+                        <td>2043</td>
+                        <td>0.46</td>
+                        <td>-0.96</td>
+                        <td>2.33</td>
+                        <td>15650000.00</td>
+                        <td>11465247.75</td>
+                        <td>19216518.77</td>
+                        <td>14053563.82</td>
+                        <td>3566518.77</td>
+                      </tr>
+                      <tr>
+                        <th>1578</th>
+                        <td>Jordan McLaughlin</td>
+                        <td>MIN</td>
+                        <td>902</td>
+                        <td>0.14</td>
+                        <td>-0.24</td>
+                        <td>1.22</td>
+                        <td>2000000.00</td>
+                        <td>6015971.29</td>
+                        <td>5492666.63</td>
+                        <td>5492666.63</td>
+                        <td>3492666.63</td>
+                      </tr>
+                      <tr>
+                        <th>568</th>
+                        <td>Seth Curry</td>
+                        <td>PHI</td>
+                        <td>1566</td>
+                        <td>0.29</td>
+                        <td>-1.07</td>
+                        <td>1.57</td>
+                        <td>8207518.00</td>
+                        <td>7716849.67</td>
+                        <td>11621860.80</td>
+                        <td>7418550.76</td>
+                        <td>3414342.80</td>
+                      </tr>
+                      <tr>
+                        <th>1630</th>
+                        <td>Davion Mitchell</td>
+                        <td>SAC</td>
+                        <td>2076</td>
+                        <td>-1.61</td>
+                        <td>0.40</td>
+                        <td>1.62</td>
+                        <td>4603200.00</td>
+                        <td>7963244.35</td>
+                        <td>7963244.35</td>
+                        <td>7963244.35</td>
+                        <td>3360044.35</td>
+                      </tr>
+                      <tr>
+                        <th>1933</th>
+                        <td>Naz Reid</td>
+                        <td>MIN</td>
+                        <td>1215</td>
+                        <td>-2.51</td>
+                        <td>0.48</td>
+                        <td>0.45</td>
+                        <td>1782621.00</td>
+                        <td>2204301.22</td>
+                        <td>5035950.33</td>
+                        <td>5035950.33</td>
+                        <td>3253329.33</td>
+                      </tr>
+                      <tr>
+                        <th>970</th>
+                        <td>James Harden</td>
+                        <td>BRK</td>
+                        <td>1627</td>
+                        <td>2.70</td>
+                        <td>-1.73</td>
+                        <td>3.11</td>
+                        <td>44310840.00</td>
+                        <td>15299351.66</td>
+                        <td>47474028.86</td>
+                        <td>50895035.64</td>
+                        <td>3163188.86</td>
+                      </tr>
+                      <tr>
+                        <th>14</th>
+                        <td>Steven Adams</td>
+                        <td>MEM</td>
+                        <td>1999</td>
+                        <td>1.68</td>
+                        <td>0.62</td>
+                        <td>5.14</td>
+                        <td>17073171.00</td>
+                        <td>25316242.47</td>
+                        <td>20140544.52</td>
+                        <td>17840361.15</td>
+                        <td>3067373.52</td>
+                      </tr>
+                      <tr>
+                        <th>1282</th>
+                        <td>Tre Jones</td>
+                        <td>SAS</td>
+                        <td>1148</td>
+                        <td>0.28</td>
+                        <td>1.94</td>
+                        <td>2.88</td>
+                        <td>1517981.00</td>
+                        <td>14176409.72</td>
+                        <td>4490596.66</td>
+                        <td>4490596.66</td>
+                        <td>2972615.66</td>
+                      </tr>
+                      <tr>
+                        <th>1744</th>
+                        <td>Jusuf Nurkic</td>
+                        <td>POR</td>
+                        <td>1579</td>
+                        <td>-0.20</td>
+                        <td>3.39</td>
+                        <td>4.81</td>
+                        <td>12000000.00</td>
+                        <td>23696294.34</td>
+                        <td>14876840.94</td>
+                        <td>14254175.90</td>
+                        <td>2876840.94</td>
+                      </tr>
+                      <tr>
+                        <th>279</th>
+                        <td>Bogdan Bogdanovic</td>
+                        <td>ATL</td>
+                        <td>1848</td>
+                        <td>2.61</td>
+                        <td>-0.47</td>
+                        <td>4.59</td>
+                        <td>18000000.00</td>
+                        <td>22598414.54</td>
+                        <td>20836859.34</td>
+                        <td>17750741.97</td>
+                        <td>2836859.34</td>
+                      </tr>
+                      <tr>
+                        <th>1867</th>
+                        <td>Jordan Poole</td>
+                        <td>GSW</td>
+                        <td>2283</td>
+                        <td>1.86</td>
+                        <td>-0.97</td>
+                        <td>4.26</td>
+                        <td>2161440.00</td>
+                        <td>20957311.14</td>
+                        <td>4900945.14</td>
+                        <td>4900945.14</td>
+                        <td>2739505.14</td>
+                      </tr>
+                      <tr>
+                        <th>1561</th>
+                        <td>Jaden McDaniels</td>
+                        <td>MIN</td>
+                        <td>1803</td>
+                        <td>-2.70</td>
+                        <td>1.93</td>
+                        <td>1.83</td>
+                        <td>2063280.00</td>
+                        <td>9002946.46</td>
+                        <td>4754762.59</td>
+                        <td>4754762.59</td>
+                        <td>2691482.59</td>
+                      </tr>
+                      <tr>
+                        <th>847</th>
+                        <td>Taj Gibson</td>
+                        <td>NYK</td>
+                        <td>946</td>
+                        <td>-1.70</td>
+                        <td>0.85</td>
+                        <td>0.91</td>
+                        <td>4910000.00</td>
+                        <td>4465019.69</td>
+                        <td>7580295.22</td>
+                        <td>7859622.13</td>
+                        <td>2670295.22</td>
+                      </tr>
+                      <tr>
+                        <th>2274</th>
+                        <td>Gabe Vincent</td>
+                        <td>MIA</td>
+                        <td>1589</td>
+                        <td>-0.91</td>
+                        <td>1.15</td>
+                        <td>2.42</td>
+                        <td>1669178.00</td>
+                        <td>11939646.07</td>
+                        <td>4078617.52</td>
+                        <td>4078617.52</td>
+                        <td>2409439.52</td>
+                      </tr>
+                      <tr>
+                        <th>2</th>
+                        <td>Precious Achiuwa</td>
+                        <td>TOR</td>
+                        <td>1725</td>
+                        <td>-2.52</td>
+                        <td>2.41</td>
+                        <td>2.31</td>
+                        <td>2711280.00</td>
+                        <td>11374317.45</td>
+                        <td>5032115.92</td>
+                        <td>5032115.92</td>
+                        <td>2320835.92</td>
+                      </tr>
+                      <tr>
+                        <th>299</th>
+                        <td>Devin Booker</td>
+                        <td>PHO</td>
+                        <td>2345</td>
+                        <td>4.37</td>
+                        <td>0.38</td>
+                        <td>9.07</td>
+                        <td>31650600.00</td>
+                        <td>44662446.11</td>
+                        <td>33939168.31</td>
+                        <td>18924954.93</td>
+                        <td>2288568.31</td>
+                      </tr>
+                      <tr>
+                        <th>182</th>
+                        <td>Nicolas Batum</td>
+                        <td>LAC</td>
+                        <td>1462</td>
+                        <td>-1.56</td>
+                        <td>1.71</td>
+                        <td>2.17</td>
+                        <td>12026998.00</td>
+                        <td>10673006.39</td>
+                        <td>14258494.63</td>
+                        <td>11910242.04</td>
+                        <td>2231496.63</td>
+                      </tr>
+                      <tr>
+                        <th>1218</th>
+                        <td>LeBron James</td>
+                        <td>LAL</td>
+                        <td>2084</td>
+                        <td>4.64</td>
+                        <td>0.10</td>
+                        <td>7.99</td>
+                        <td>41180544.00</td>
+                        <td>39324480.56</td>
+                        <td>43341167.40</td>
+                        <td>39438241.89</td>
+                        <td>2160623.40</td>
+                      </tr>
+                      <tr>
+                        <th>1336</th>
+                        <td>Maxi Kleber</td>
+                        <td>DAL</td>
+                        <td>1450</td>
+                        <td>-2.94</td>
+                        <td>2.95</td>
+                        <td>2.03</td>
+                        <td>8750000.00</td>
+                        <td>10006202.05</td>
+                        <td>10883998.38</td>
+                        <td>10587400.40</td>
+                        <td>2133998.38</td>
+                      </tr>
+                      <tr>
+                        <th>2059</th>
+                        <td>Landry Shamet</td>
+                        <td>PHO</td>
+                        <td>1437</td>
+                        <td>-0.61</td>
+                        <td>0.16</td>
+                        <td>1.69</td>
+                        <td>3768342.00</td>
+                        <td>8302511.31</td>
+                        <td>5844783.12</td>
+                        <td>7062089.20</td>
+                        <td>2076441.12</td>
+                      </tr>
+                      <tr>
+                        <th>2299</th>
+                        <td>Moritz Wagner</td>
+                        <td>ORL</td>
+                        <td>960</td>
+                        <td>0.45</td>
+                        <td>-1.51</td>
+                        <td>0.84</td>
+                        <td>1729217.00</td>
+                        <td>4117068.59</td>
+                        <td>3776865.17</td>
+                        <td>2337982.12</td>
+                        <td>2047648.17</td>
+                      </tr>
+                      <tr>
+                        <th>703</th>
+                        <td>Anthony Edwards</td>
+                        <td>MIN</td>
+                        <td>2466</td>
+                        <td>1.65</td>
+                        <td>0.12</td>
+                        <td>5.70</td>
+                        <td>10245480.00</td>
+                        <td>28061032.69</td>
+                        <td>12234485.42</td>
+                        <td>12234485.42</td>
+                        <td>1989005.42</td>
+                      </tr>
+                      <tr>
+                        <th>1012</th>
+                        <td>Josh Hart</td>
+                        <td>NOP</td>
+                        <td>1374</td>
+                        <td>0.40</td>
+                        <td>-0.48</td>
+                        <td>1.89</td>
+                        <td>12000000.00</td>
+                        <td>9286588.79</td>
+                        <td>13939927.64</td>
+                        <td>13588445.58</td>
+                        <td>1939927.64</td>
+                      </tr>
+                      <tr>
+                        <th>487</th>
+                        <td>Amir Coffey</td>
+                        <td>LAC</td>
+                        <td>1567</td>
+                        <td>0.26</td>
+                        <td>-0.88</td>
+                        <td>1.71</td>
+                        <td>573576.00</td>
+                        <td>8402554.08</td>
+                        <td>2495728.01</td>
+                        <td>2495728.01</td>
+                        <td>1922152.01</td>
+                      </tr>
+                      <tr>
+                        <th>1755</th>
+                        <td>Chuma Okeke</td>
+                        <td>ORL</td>
+                        <td>1749</td>
+                        <td>-3.56</td>
+                        <td>1.08</td>
+                        <td>0.24</td>
+                        <td>3277080.00</td>
+                        <td>1185097.53</td>
+                        <td>5174625.55</td>
+                        <td>5174625.55</td>
+                        <td>1897545.55</td>
+                      </tr>
+                      <tr>
+                        <th>2272</th>
+                        <td>Devin Vassell</td>
+                        <td>SAS</td>
+                        <td>1937</td>
+                        <td>-0.22</td>
+                        <td>-0.56</td>
+                        <td>1.94</td>
+                        <td>4235160.00</td>
+                        <td>9563031.06</td>
+                        <td>6131428.60</td>
+                        <td>6131428.60</td>
+                        <td>1896268.60</td>
+                      </tr>
+                      <tr>
+                        <th>1304</th>
+                        <td>Cory Joseph</td>
+                        <td>DET</td>
+                        <td>1600</td>
+                        <td>-0.40</td>
+                        <td>-0.13</td>
+                        <td>1.80</td>
+                        <td>7310000.00</td>
+                        <td>8859820.03</td>
+                        <td>9083079.58</td>
+                        <td>8585294.52</td>
+                        <td>1773079.58</td>
+                      </tr>
+                      <tr>
+                        <th>1287</th>
+                        <td>Tyus Jones</td>
+                        <td>MEM</td>
+                        <td>1549</td>
+                        <td>1.53</td>
+                        <td>-0.26</td>
+                        <td>3.13</td>
+                        <td>8376286.00</td>
+                        <td>15427727.84</td>
+                        <td>10145620.13</td>
+                        <td>8637571.66</td>
+                        <td>1769334.13</td>
+                      </tr>
+                      <tr>
+                        <th>2397</th>
+                        <td>Christian Wood</td>
+                        <td>HOU</td>
+                        <td>2094</td>
+                        <td>-0.80</td>
+                        <td>-1.24</td>
+                        <td>0.76</td>
+                        <td>13666667.00</td>
+                        <td>3749710.19</td>
+                        <td>15434663.75</td>
+                        <td>7750057.46</td>
+                        <td>1767996.75</td>
+                      </tr>
+                      <tr>
+                        <th>1624</th>
+                        <td>Shake Milton</td>
+                        <td>PHI</td>
+                        <td>1179</td>
+                        <td>-1.01</td>
+                        <td>-1.29</td>
+                        <td>0.27</td>
+                        <td>1846738.00</td>
+                        <td>1333466.37</td>
+                        <td>3540132.86</td>
+                        <td>2836648.99</td>
+                        <td>1693394.86</td>
+                      </tr>
+                      <tr>
+                        <th>1041</th>
+                        <td>Willy Hernangomez</td>
+                        <td>NOP</td>
+                        <td>839</td>
+                        <td>1.55</td>
+                        <td>-1.99</td>
+                        <td>0.99</td>
+                        <td>2327220.00</td>
+                        <td>4871909.18</td>
+                        <td>3973557.41</td>
+                        <td>2717672.38</td>
+                        <td>1646337.41</td>
+                      </tr>
+                      <tr>
+                        <th>628</th>
+                        <td>Hamidou Diallo</td>
+                        <td>DET</td>
+                        <td>1269</td>
+                        <td>-0.88</td>
+                        <td>1.29</td>
+                        <td>2.05</td>
+                        <td>5200000.00</td>
+                        <td>10115273.14</td>
+                        <td>6723423.46</td>
+                        <td>4788519.76</td>
+                        <td>1523423.46</td>
+                      </tr>
+                      <tr>
+                        <th>1672</th>
+                        <td>Monte Morris</td>
+                        <td>DEN</td>
+                        <td>2239</td>
+                        <td>1.34</td>
+                        <td>-1.56</td>
+                        <td>2.85</td>
+                        <td>8449074.00</td>
+                        <td>14027993.79</td>
+                        <td>9898625.14</td>
+                        <td>10725825.30</td>
+                        <td>1449551.14</td>
+                      </tr>
+                      <tr>
+                        <th>347</th>
+                        <td>Dillon Brooks</td>
+                        <td>MEM</td>
+                        <td>885</td>
+                        <td>1.12</td>
+                        <td>3.01</td>
+                        <td>3.12</td>
+                        <td>12200000.00</td>
+                        <td>15367593.94</td>
+                        <td>13609840.17</td>
+                        <td>9584198.98</td>
+                        <td>1409840.17</td>
+                      </tr>
+                      <tr>
+                        <th>2290</th>
+                        <td>Dean Wade</td>
+                        <td>CLE</td>
+                        <td>980</td>
+                        <td>-1.16</td>
+                        <td>1.88</td>
+                        <td>1.72</td>
+                        <td>1782621.00</td>
+                        <td>8470135.51</td>
+                        <td>3152308.97</td>
+                        <td>3152308.97</td>
+                        <td>1369687.97</td>
+                      </tr>
+                      <tr>
+                        <th>1636</th>
+                        <td>Evan Mobley</td>
+                        <td>CLE</td>
+                        <td>2331</td>
+                        <td>-2.72</td>
+                        <td>1.60</td>
+                        <td>1.92</td>
+                        <td>8075160.00</td>
+                        <td>9435049.88</td>
+                        <td>9435049.88</td>
+                        <td>9435049.88</td>
+                        <td>1359889.88</td>
+                      </tr>
+                      <tr>
+                        <th>1107</th>
+                        <td>Richaun Holmes</td>
+                        <td>SAC</td>
+                        <td>1074</td>
+                        <td>-1.76</td>
+                        <td>-1.18</td>
+                        <td>-0.11</td>
+                        <td>10384500.00</td>
+                        <td>-534270.87</td>
+                        <td>11584747.90</td>
+                        <td>5985290.48</td>
+                        <td>1200247.90</td>
+                      </tr>
+                      <tr>
+                        <th>1485</th>
+                        <td>Kyle Lowry</td>
+                        <td>MIA</td>
+                        <td>2133</td>
+                        <td>2.15</td>
+                        <td>0.82</td>
+                        <td>6.28</td>
+                        <td>26984128.00</td>
+                        <td>30921510.87</td>
+                        <td>28022687.31</td>
+                        <td>32000178.46</td>
+                        <td>1038559.31</td>
+                      </tr>
+                      <tr>
+                        <th>2375</th>
+                        <td>Grant Williams</td>
+                        <td>BOS</td>
+                        <td>1875</td>
+                        <td>-1.09</td>
+                        <td>0.13</td>
+                        <td>1.71</td>
+                        <td>2617800.00</td>
+                        <td>8408972.23</td>
+                        <td>3574290.33</td>
+                        <td>3574290.33</td>
+                        <td>956490.33</td>
+                      </tr>
+                      <tr>
+                        <th>2167</th>
+                        <td>Garrett Temple</td>
+                        <td>NOP</td>
+                        <td>1098</td>
+                        <td>-3.02</td>
+                        <td>-0.52</td>
+                        <td>-0.44</td>
+                        <td>4910000.00</td>
+                        <td>-2169815.85</td>
+                        <td>5737204.88</td>
+                        <td>6151846.98</td>
+                        <td>827204.88</td>
+                      </tr>
+                      <tr>
+                        <th>1760</th>
+                        <td>Onyeka Okongwu</td>
+                        <td>ATL</td>
+                        <td>992</td>
+                        <td>0.00</td>
+                        <td>2.04</td>
+                        <td>2.42</td>
+                        <td>6104280.00</td>
+                        <td>11911932.87</td>
+                        <td>6918451.96</td>
+                        <td>6918451.96</td>
+                        <td>814171.96</td>
+                      </tr>
+                      <tr>
+                        <th>1438</th>
+                        <td>Damian Lillard</td>
+                        <td>POR</td>
+                        <td>1056</td>
+                        <td>4.15</td>
+                        <td>-1.62</td>
+                        <td>2.87</td>
+                        <td>39344900.00</td>
+                        <td>14116425.98</td>
+                        <td>40121375.23</td>
+                        <td>36132894.20</td>
+                        <td>776475.23</td>
+                      </tr>
+                      <tr>
+                        <th>1209</th>
+                        <td>Reggie Jackson</td>
+                        <td>LAC</td>
+                        <td>2337</td>
+                        <td>-0.90</td>
+                        <td>-0.05</td>
+                        <td>2.14</td>
+                        <td>10384500.00</td>
+                        <td>10532153.75</td>
+                        <td>10863304.16</td>
+                        <td>10009391.54</td>
+                        <td>478804.16</td>
+                      </tr>
+                      <tr>
+                        <th>102</th>
+                        <td>OG Anunoby</td>
+                        <td>TOR</td>
+                        <td>1728</td>
+                        <td>0.18</td>
+                        <td>-0.59</td>
+                        <td>2.06</td>
+                        <td>16071429.00</td>
+                        <td>10151982.99</td>
+                        <td>16500217.84</td>
+                        <td>11429115.26</td>
+                        <td>428788.84</td>
+                      </tr>
+                      <tr>
+                        <th>1260</th>
+                        <td>Stanley Johnson</td>
+                        <td>LAL</td>
+                        <td>1094</td>
+                        <td>-0.69</td>
+                        <td>0.19</td>
+                        <td>1.25</td>
+                        <td>1368998.00</td>
+                        <td>6150318.41</td>
+                        <td>1735211.99</td>
+                        <td>1391958.41</td>
+                        <td>366213.99</td>
+                      </tr>
+                      <tr>
+                        <th>1729</th>
+                        <td>Jaylen Nowell</td>
+                        <td>MIN</td>
+                        <td>975</td>
+                        <td>2.76</td>
+                        <td>-3.09</td>
+                        <td>1.21</td>
+                        <td>1782621.00</td>
+                        <td>5934671.94</td>
+                        <td>1965341.83</td>
+                        <td>1965341.83</td>
+                        <td>182720.83</td>
+                      </tr>
+                      <tr>
+                        <th>1384</th>
+                        <td>Zach LaVine</td>
+                        <td>CHI</td>
+                        <td>2328</td>
+                        <td>2.64</td>
+                        <td>-2.48</td>
+                        <td>3.46</td>
+                        <td>19500000.00</td>
+                        <td>17051750.03</td>
+                        <td>19626523.32</td>
+                        <td>7146323.93</td>
+                        <td>126523.32</td>
+                      </tr>
+                      <tr>
+                        <th>1886</th>
+                        <td>Dwight Powell</td>
+                        <td>DAL</td>
+                        <td>1798</td>
+                        <td>0.46</td>
+                        <td>-0.42</td>
+                        <td>2.55</td>
+                        <td>11080125.00</td>
+                        <td>12539639.95</td>
+                        <td>11147814.11</td>
+                        <td>9840833.15</td>
+                        <td>67689.11</td>
+                      </tr>
+                      <tr>
+                        <th>19</th>
+                        <td>Bam Adebayo</td>
+                        <td>MIA</td>
+                        <td>1825</td>
+                        <td>-0.25</td>
+                        <td>4.03</td>
+                        <td>6.10</td>
+                        <td>28103500.00</td>
+                        <td>30054084.74</td>
+                        <td>28169769.51</td>
+                        <td>20950477.93</td>
+                        <td>66269.51</td>
+                      </tr>
+                      <tr>
+                        <th>1444</th>
+                        <td>Nassir Little</td>
+                        <td>POR</td>
+                        <td>1088</td>
+                        <td>0.04</td>
+                        <td>1.28</td>
+                        <td>2.25</td>
+                        <td>2316240.00</td>
+                        <td>11076081.74</td>
+                        <td>2374536.03</td>
+                        <td>2374536.03</td>
+                        <td>58296.03</td>
+                      </tr>
+                      <tr>
+                        <th>941</th>
+                        <td>Josh Green</td>
+                        <td>DAL</td>
+                        <td>1039</td>
+                        <td>-2.04</td>
+                        <td>2.04</td>
+                        <td>1.47</td>
+                        <td>2957520.00</td>
+                        <td>7234412.03</td>
+                        <td>2814838.05</td>
+                        <td>2814838.05</td>
+                        <td>-142681.95</td>
+                      </tr>
+                      <tr>
+                        <th>1331</th>
+                        <td>Corey Kispert</td>
+                        <td>WAS</td>
+                        <td>1801</td>
+                        <td>0.08</td>
+                        <td>-2.11</td>
+                        <td>0.65</td>
+                        <td>3383640.00</td>
+                        <td>3205068.89</td>
+                        <td>3205068.89</td>
+                        <td>3205068.89</td>
+                        <td>-178571.11</td>
+                      </tr>
+                      <tr>
+                        <th>848</th>
+                        <td>Josh Giddey</td>
+                        <td>OKC</td>
+                        <td>1700</td>
+                        <td>-1.89</td>
+                        <td>0.46</td>
+                        <td>1.15</td>
+                        <td>5988000.00</td>
+                        <td>5667449.38</td>
+                        <td>5667449.38</td>
+                        <td>5667449.38</td>
+                        <td>-320550.62</td>
+                      </tr>
+                      <tr>
+                        <th>1559</th>
+                        <td>Jalen McDaniels</td>
+                        <td>CHA</td>
+                        <td>895</td>
+                        <td>-1.02</td>
+                        <td>0.58</td>
+                        <td>1.05</td>
+                        <td>1782621.00</td>
+                        <td>5183389.73</td>
+                        <td>1207957.48</td>
+                        <td>1207957.48</td>
+                        <td>-574663.52</td>
+                      </tr>
+                      <tr>
+                        <th>245</th>
+                        <td>Khem Birch</td>
+                        <td>TOR</td>
+                        <td>991</td>
+                        <td>-1.56</td>
+                        <td>-0.43</td>
+                        <td>0.38</td>
+                        <td>6350000.00</td>
+                        <td>1868635.62</td>
+                        <td>5757712.57</td>
+                        <td>6092396.95</td>
+                        <td>-592287.43</td>
+                      </tr>
+                      <tr>
+                        <th>2217</th>
+                        <td>Obi Toppin</td>
+                        <td>NYK</td>
+                        <td>1230</td>
+                        <td>-0.54</td>
+                        <td>-0.25</td>
+                        <td>1.22</td>
+                        <td>5105160.00</td>
+                        <td>6016370.96</td>
+                        <td>4202771.94</td>
+                        <td>4202771.94</td>
+                        <td>-902388.06</td>
+                      </tr>
+                      <tr>
+                        <th>374</th>
+                        <td>Reggie Bullock</td>
+                        <td>DAL</td>
+                        <td>1902</td>
+                        <td>-0.42</td>
+                        <td>0.12</td>
+                        <td>2.37</td>
+                        <td>9536000.00</td>
+                        <td>11669055.25</td>
+                        <td>8521230.92</td>
+                        <td>5001518.79</td>
+                        <td>-1014769.08</td>
+                      </tr>
+                      <tr>
+                        <th>1947</th>
+                        <td>Austin Rivers</td>
+                        <td>DEN</td>
+                        <td>1480</td>
+                        <td>-1.99</td>
+                        <td>-1.43</td>
+                        <td>-0.51</td>
+                        <td>2401537.00</td>
+                        <td>-2493427.30</td>
+                        <td>1324811.49</td>
+                        <td>1462707.11</td>
+                        <td>-1076725.51</td>
+                      </tr>
+                      <tr>
+                        <th>917</th>
+                        <td>Draymond Green</td>
+                        <td>GSW</td>
+                        <td>1329</td>
+                        <td>-1.59</td>
+                        <td>4.94</td>
+                        <td>4.21</td>
+                        <td>24026712.00</td>
+                        <td>20736130.34</td>
+                        <td>22908476.38</td>
+                        <td>29334818.92</td>
+                        <td>-1118235.62</td>
+                      </tr>
+                      <tr>
+                        <th>173</th>
+                        <td>Keita Bates-Diop</td>
+                        <td>SAS</td>
+                        <td>956</td>
+                        <td>-2.58</td>
+                        <td>1.04</td>
+                        <td>0.59</td>
+                        <td>1729217.00</td>
+                        <td>2904832.64</td>
+                        <td>510651.52</td>
+                        <td>74522.52</td>
+                        <td>-1218565.48</td>
+                      </tr>
+                      <tr>
+                        <th>333</th>
+                        <td>Oshae Brissett</td>
+                        <td>IND</td>
+                        <td>1564</td>
+                        <td>-1.13</td>
+                        <td>-2.79</td>
+                        <td>-0.94</td>
+                        <td>1701593.00</td>
+                        <td>-4612282.18</td>
+                        <td>310660.38</td>
+                        <td>310660.38</td>
+                        <td>-1390932.62</td>
+                      </tr>
+                      <tr>
+                        <th>539</th>
+                        <td>Torrey Craig</td>
+                        <td>IND</td>
+                        <td>1034</td>
+                        <td>-2.42</td>
+                        <td>0.30</td>
+                        <td>0.33</td>
+                        <td>4878049.00</td>
+                        <td>1636290.05</td>
+                        <td>3351734.84</td>
+                        <td>4225305.40</td>
+                        <td>-1526314.16</td>
+                      </tr>
+                      <tr>
+                        <th>2048</th>
+                        <td>Alperen Sengun</td>
+                        <td>HOU</td>
+                        <td>1489</td>
+                        <td>-1.04</td>
+                        <td>-1.27</td>
+                        <td>0.34</td>
+                        <td>3214680.00</td>
+                        <td>1664815.72</td>
+                        <td>1664815.72</td>
+                        <td>1664815.72</td>
+                        <td>-1549864.28</td>
+                      </tr>
+                      <tr>
+                        <th>1491</th>
+                        <td>Trey Lyles</td>
+                        <td>DET</td>
+                        <td>990</td>
+                        <td>-0.69</td>
+                        <td>-1.65</td>
+                        <td>0.21</td>
+                        <td>2500000.00</td>
+                        <td>1022020.85</td>
+                        <td>933406.86</td>
+                        <td>1246148.82</td>
+                        <td>-1566593.14</td>
+                      </tr>
+                      <tr>
+                        <th>2287</th>
+                        <td>Nikola Vucevic</td>
+                        <td>CHI</td>
+                        <td>2418</td>
+                        <td>-2.01</td>
+                        <td>1.43</td>
+                        <td>2.68</td>
+                        <td>24000000.00</td>
+                        <td>13182674.91</td>
+                        <td>22388227.30</td>
+                        <td>16878620.24</td>
+                        <td>-1611772.70</td>
+                      </tr>
+                      <tr>
+                        <th>413</th>
+                        <td>Kentavious Caldwell-Pope</td>
+                        <td>WAS</td>
+                        <td>2329</td>
+                        <td>-0.99</td>
+                        <td>-0.12</td>
+                        <td>1.96</td>
+                        <td>13038862.00</td>
+                        <td>9628813.95</td>
+                        <td>11387772.51</td>
+                        <td>12390438.60</td>
+                        <td>-1651089.49</td>
+                      </tr>
+                      <tr>
+                        <th>2389</th>
+                        <td>Ziaire Williams</td>
+                        <td>MEM</td>
+                        <td>1346</td>
+                        <td>-1.22</td>
+                        <td>-0.75</td>
+                        <td>0.53</td>
+                        <td>4373040.00</td>
+                        <td>2634577.89</td>
+                        <td>2634577.89</td>
+                        <td>2634577.89</td>
+                        <td>-1738462.11</td>
+                      </tr>
+                      <tr>
+                        <th>2137</th>
+                        <td>Jalen Suggs</td>
+                        <td>ORL</td>
+                        <td>1307</td>
+                        <td>-4.16</td>
+                        <td>2.83</td>
+                        <td>0.96</td>
+                        <td>6592920.00</td>
+                        <td>4722000.07</td>
+                        <td>4722000.07</td>
+                        <td>4722000.07</td>
+                        <td>-1870919.93</td>
+                      </tr>
+                      <tr>
+                        <th>136</th>
+                        <td>Lonzo Ball</td>
+                        <td>CHI</td>
+                        <td>1212</td>
+                        <td>0.00</td>
+                        <td>2.94</td>
+                        <td>3.55</td>
+                        <td>18604651.00</td>
+                        <td>17462565.13</td>
+                        <td>16726428.40</td>
+                        <td>14001838.15</td>
+                        <td>-1878222.60</td>
+                      </tr>
+                      <tr>
+                        <th>357</th>
+                        <td>Jaylen Brown</td>
+                        <td>BOS</td>
+                        <td>2220</td>
+                        <td>1.50</td>
+                        <td>1.26</td>
+                        <td>6.30</td>
+                        <td>26758928.00</td>
+                        <td>31013309.16</td>
+                        <td>24856369.68</td>
+                        <td>16263279.47</td>
+                        <td>-1902558.32</td>
+                      </tr>
+                      <tr>
+                        <th>37</th>
+                        <td>Nickeil Alexander-Walker</td>
+                        <td>NOP</td>
+                        <td>1317</td>
+                        <td>-1.85</td>
+                        <td>-1.55</td>
+                        <td>-0.44</td>
+                        <td>3261480.00</td>
+                        <td>-2164999.47</td>
+                        <td>1203856.04</td>
+                        <td>1203856.04</td>
+                        <td>-2057623.96</td>
+                      </tr>
+                      <tr>
+                        <th>2129</th>
+                        <td>Lamar Stevens</td>
+                        <td>CLE</td>
+                        <td>1015</td>
+                        <td>-2.55</td>
+                        <td>-0.04</td>
+                        <td>0.08</td>
+                        <td>1517981.00</td>
+                        <td>397907.68</td>
+                        <td>-622391.65</td>
+                        <td>-622391.65</td>
+                        <td>-2140372.65</td>
+                      </tr>
+                      <tr>
+                        <th>602</th>
+                        <td>Dewayne Dedmon</td>
+                        <td>MIA</td>
+                        <td>1065</td>
+                        <td>-2.32</td>
+                        <td>0.99</td>
+                        <td>0.77</td>
+                        <td>5256308.00</td>
+                        <td>3783991.31</td>
+                        <td>3024497.54</td>
+                        <td>4947701.82</td>
+                        <td>-2231810.46</td>
+                      </tr>
+                      <tr>
+                        <th>162</th>
+                        <td>RJ Barrett</td>
+                        <td>NYK</td>
+                        <td>2417</td>
+                        <td>-0.66</td>
+                        <td>-0.92</td>
+                        <td>1.45</td>
+                        <td>8623920.00</td>
+                        <td>7159983.03</td>
+                        <td>6020056.89</td>
+                        <td>6020056.89</td>
+                        <td>-2603863.11</td>
+                      </tr>
+                      <tr>
+                        <th>93</th>
+                        <td>Carmelo Anthony</td>
+                        <td>LAL</td>
+                        <td>1793</td>
+                        <td>0.12</td>
+                        <td>-1.80</td>
+                        <td>0.98</td>
+                        <td>2641691.00</td>
+                        <td>4829123.27</td>
+                        <td>21058.77</td>
+                        <td>6711276.78</td>
+                        <td>-2620632.23</td>
+                      </tr>
+                      <tr>
+                        <th>242</th>
+                        <td>Saddiq Bey</td>
+                        <td>DET</td>
+                        <td>2704</td>
+                        <td>0.13</td>
+                        <td>-2.42</td>
+                        <td>0.63</td>
+                        <td>2824320.00</td>
+                        <td>3094882.95</td>
+                        <td>166630.86</td>
+                        <td>166630.86</td>
+                        <td>-2657689.14</td>
+                      </tr>
+                      <tr>
+                        <th>2226</th>
+                        <td>Karl-Anthony Towns</td>
+                        <td>MIN</td>
+                        <td>2476</td>
+                        <td>3.30</td>
+                        <td>-1.26</td>
+                        <td>6.13</td>
+                        <td>31650600.00</td>
+                        <td>30178748.41</td>
+                        <td>28890254.37</td>
+                        <td>29055861.72</td>
+                        <td>-2760345.63</td>
+                      </tr>
+                      <tr>
+                        <th>2004</th>
+                        <td>Ricky Rubio</td>
+                        <td>CLE</td>
+                        <td>970</td>
+                        <td>0.46</td>
+                        <td>3.58</td>
+                        <td>3.39</td>
+                        <td>17800000.00</td>
+                        <td>16706659.64</td>
+                        <td>15010863.97</td>
+                        <td>16954881.26</td>
+                        <td>-2789136.03</td>
+                      </tr>
+                      <tr>
+                        <th>940</th>
+                        <td>Jeff Green</td>
+                        <td>DEN</td>
+                        <td>1849</td>
+                        <td>-1.58</td>
+                        <td>-1.97</td>
+                        <td>-0.75</td>
+                        <td>4500000.00</td>
+                        <td>-3695044.94</td>
+                        <td>1574135.24</td>
+                        <td>3016350.95</td>
+                        <td>-2925864.76</td>
+                      </tr>
+                      <tr>
+                        <th>1019</th>
+                        <td>Jaxson Hayes</td>
+                        <td>NOP</td>
+                        <td>1398</td>
+                        <td>-1.06</td>
+                        <td>-1.04</td>
+                        <td>0.46</td>
+                        <td>5348280.00</td>
+                        <td>2277412.91</td>
+                        <td>2311706.91</td>
+                        <td>2311706.91</td>
+                        <td>-3036573.09</td>
+                      </tr>
+                      <tr>
+                        <th>1585</th>
+                        <td>Ben McLemore</td>
+                        <td>POR</td>
+                        <td>1285</td>
+                        <td>-1.58</td>
+                        <td>-3.29</td>
+                        <td>-1.40</td>
+                        <td>2389641.00</td>
+                        <td>-6887387.74</td>
+                        <td>-686929.56</td>
+                        <td>-791439.42</td>
+                        <td>-3076570.56</td>
+                      </tr>
+                      <tr>
+                        <th>138</th>
+                        <td>Mo Bamba</td>
+                        <td>ORL</td>
+                        <td>1824</td>
+                        <td>-2.11</td>
+                        <td>0.58</td>
+                        <td>1.14</td>
+                        <td>7568743.00</td>
+                        <td>5597341.61</td>
+                        <td>4334108.30</td>
+                        <td>1806700.58</td>
+                        <td>-3234634.70</td>
+                      </tr>
+                      <tr>
+                        <th>704</th>
+                        <td>Kessler Edwards</td>
+                        <td>BRK</td>
+                        <td>987</td>
+                        <td>-1.99</td>
+                        <td>-1.88</td>
+                        <td>-0.57</td>
+                        <td>463211.00</td>
+                        <td>-2786404.71</td>
+                        <td>-2786404.71</td>
+                        <td>-2786404.71</td>
+                        <td>-3249615.71</td>
+                      </tr>
+                      <tr>
+                        <th>1959</th>
+                        <td>Jeremiah Robinson-Earl</td>
+                        <td>OKC</td>
+                        <td>1087</td>
+                        <td>-3.93</td>
+                        <td>0.69</td>
+                        <td>-0.27</td>
+                        <td>2000000.00</td>
+                        <td>-1344036.48</td>
+                        <td>-1344036.48</td>
+                        <td>-1344036.48</td>
+                        <td>-3344036.48</td>
+                      </tr>
+                      <tr>
+                        <th>1635</th>
+                        <td>Donovan Mitchell</td>
+                        <td>UTA</td>
+                        <td>2266</td>
+                        <td>4.84</td>
+                        <td>-2.56</td>
+                        <td>5.87</td>
+                        <td>28103500.00</td>
+                        <td>28892997.14</td>
+                        <td>24748454.14</td>
+                        <td>24813927.84</td>
+                        <td>-3355045.86</td>
+                      </tr>
+                      <tr>
+                        <th>1940</th>
+                        <td>Josh Richardson</td>
+                        <td>BOS</td>
+                        <td>1087</td>
+                        <td>-0.80</td>
+                        <td>-1.70</td>
+                        <td>0.14</td>
+                        <td>11615328.00</td>
+                        <td>679181.53</td>
+                        <td>8258170.40</td>
+                        <td>12937966.79</td>
+                        <td>-3357157.60</td>
+                      </tr>
+                      <tr>
+                        <th>873</th>
+                        <td>Aaron Gordon</td>
+                        <td>DEN</td>
+                        <td>2376</td>
+                        <td>0.51</td>
+                        <td>-0.41</td>
+                        <td>3.46</td>
+                        <td>16409091.00</td>
+                        <td>17019495.79</td>
+                        <td>13009483.46</td>
+                        <td>12759263.72</td>
+                        <td>-3399607.54</td>
+                      </tr>
+                      <tr>
+                        <th>1248</th>
+                        <td>James Johnson</td>
+                        <td>BRK</td>
+                        <td>1191</td>
+                        <td>-1.83</td>
+                        <td>-0.66</td>
+                        <td>0.15</td>
+                        <td>2641691.00</td>
+                        <td>756037.10</td>
+                        <td>-813651.13</td>
+                        <td>4849659.07</td>
+                        <td>-3455342.13</td>
+                      </tr>
+                      <tr>
+                        <th>319</th>
+                        <td>Avery Bradley</td>
+                        <td>LAL</td>
+                        <td>1406</td>
+                        <td>-2.82</td>
+                        <td>-0.98</td>
+                        <td>-0.75</td>
+                        <td>2641691.00</td>
+                        <td>-3685481.91</td>
+                        <td>-872171.54</td>
+                        <td>3656372.98</td>
+                        <td>-3513862.54</td>
+                      </tr>
+                      <tr>
+                        <th>1557</th>
+                        <td>CJ McCollum</td>
+                        <td>POR</td>
+                        <td>1267</td>
+                        <td>2.15</td>
+                        <td>-0.56</td>
+                        <td>2.81</td>
+                        <td>30864198.00</td>
+                        <td>13832211.40</td>
+                        <td>27296277.80</td>
+                        <td>20818030.41</td>
+                        <td>-3567920.20</td>
+                      </tr>
+                      <tr>
+                        <th>1556</th>
+                        <td>CJ McCollum</td>
+                        <td>NOP</td>
+                        <td>878</td>
+                        <td>4.87</td>
+                        <td>-0.99</td>
+                        <td>2.96</td>
+                        <td>30864198.00</td>
+                        <td>14589931.09</td>
+                        <td>27296277.80</td>
+                        <td>20818030.41</td>
+                        <td>-3567920.20</td>
+                      </tr>
+                      <tr>
+                        <th>1596</th>
+                        <td>Chimezie Metu</td>
+                        <td>SAC</td>
+                        <td>1279</td>
+                        <td>-3.35</td>
+                        <td>0.09</td>
+                        <td>-0.33</td>
+                        <td>1762796.00</td>
+                        <td>-1633022.55</td>
+                        <td>-1820003.75</td>
+                        <td>-1855960.37</td>
+                        <td>-3582799.75</td>
+                      </tr>
+                      <tr>
+                        <th>1852</th>
+                        <td>Mason Plumlee</td>
+                        <td>CHA</td>
+                        <td>1793</td>
+                        <td>-2.19</td>
+                        <td>0.93</td>
+                        <td>1.37</td>
+                        <td>9248333.00</td>
+                        <td>6747311.71</td>
+                        <td>5624262.11</td>
+                        <td>5153080.82</td>
+                        <td>-3624070.89</td>
+                      </tr>
+                      <tr>
+                        <th>838</th>
+                        <td>Paul George</td>
+                        <td>LAC</td>
+                        <td>1077</td>
+                        <td>1.14</td>
+                        <td>3.95</td>
+                        <td>4.40</td>
+                        <td>39344970.00</td>
+                        <td>21679791.15</td>
+                        <td>35671997.41</td>
+                        <td>34210116.60</td>
+                        <td>-3672972.59</td>
+                      </tr>
+                      <tr>
+                        <th>2356</th>
+                        <td>Aaron Wiggins</td>
+                        <td>OKC</td>
+                        <td>1209</td>
+                        <td>-1.85</td>
+                        <td>-1.70</td>
+                        <td>-0.49</td>
+                        <td>1305761.00</td>
+                        <td>-2426309.06</td>
+                        <td>-2426309.06</td>
+                        <td>-2426309.06</td>
+                        <td>-3732070.06</td>
+                      </tr>
+                      <tr>
+                        <th>169</th>
+                        <td>Will Barton</td>
+                        <td>DEN</td>
+                        <td>2277</td>
+                        <td>-0.63</td>
+                        <td>-0.90</td>
+                        <td>1.41</td>
+                        <td>15625000.00</td>
+                        <td>6924086.50</td>
+                        <td>11810743.77</td>
+                        <td>7872283.60</td>
+                        <td>-3814256.23</td>
+                      </tr>
+                      <tr>
+                        <th>2343</th>
+                        <td>Coby White</td>
+                        <td>CHI</td>
+                        <td>1675</td>
+                        <td>0.67</td>
+                        <td>-2.61</td>
+                        <td>0.69</td>
+                        <td>5837760.00</td>
+                        <td>3385823.58</td>
+                        <td>1965385.51</td>
+                        <td>1965385.51</td>
+                        <td>-3872374.49</td>
+                      </tr>
+                      <tr>
+                        <th>2246</th>
+                        <td>Myles Turner</td>
+                        <td>IND</td>
+                        <td>1235</td>
+                        <td>-1.15</td>
+                        <td>2.46</td>
+                        <td>2.56</td>
+                        <td>18000000.00</td>
+                        <td>12597119.85</td>
+                        <td>14095088.98</td>
+                        <td>10873803.33</td>
+                        <td>-3904911.02</td>
+                      </tr>
+                      <tr>
+                        <th>1893</th>
+                        <td>Norman Powell</td>
+                        <td>POR</td>
+                        <td>1333</td>
+                        <td>0.71</td>
+                        <td>-2.61</td>
+                        <td>0.58</td>
+                        <td>15517242.00</td>
+                        <td>2855034.03</td>
+                        <td>11582205.45</td>
+                        <td>6385551.04</td>
+                        <td>-3935036.55</td>
+                      </tr>
+                      <tr>
+                        <th>1917</th>
+                        <td>Julius Randle</td>
+                        <td>NYK</td>
+                        <td>2544</td>
+                        <td>-2.29</td>
+                        <td>-0.99</td>
+                        <td>-0.69</td>
+                        <td>19800000.00</td>
+                        <td>-3408760.66</td>
+                        <td>15860233.73</td>
+                        <td>7531732.28</td>
+                        <td>-3939766.27</td>
+                      </tr>
+                      <tr>
+                        <th>625</th>
+                        <td>DeMar DeRozan</td>
+                        <td>CHI</td>
+                        <td>2743</td>
+                        <td>3.86</td>
+                        <td>-2.16</td>
+                        <td>6.21</td>
+                        <td>26000000.00</td>
+                        <td>30592837.38</td>
+                        <td>21863211.04</td>
+                        <td>16674313.85</td>
+                        <td>-4136788.96</td>
+                      </tr>
+                      <tr>
+                        <th>1277</th>
+                        <td>Damian Jones</td>
+                        <td>SAC</td>
+                        <td>1017</td>
+                        <td>-1.02</td>
+                        <td>-1.51</td>
+                        <td>0.11</td>
+                        <td>1977011.00</td>
+                        <td>543820.02</td>
+                        <td>-2206547.71</td>
+                        <td>-1185565.78</td>
+                        <td>-4183558.71</td>
+                      </tr>
+                      <tr>
+                        <th>769</th>
+                        <td>Evan Fournier</td>
+                        <td>NYK</td>
+                        <td>2358</td>
+                        <td>0.76</td>
+                        <td>-1.84</td>
+                        <td>2.02</td>
+                        <td>17142857.00</td>
+                        <td>9938337.57</td>
+                        <td>12861694.86</td>
+                        <td>9852452.03</td>
+                        <td>-4281162.14</td>
+                      </tr>
+                      <tr>
+                        <th>1968</th>
+                        <td>Isaiah Roby</td>
+                        <td>OKC</td>
+                        <td>948</td>
+                        <td>-0.85</td>
+                        <td>-1.31</td>
+                        <td>0.28</td>
+                        <td>1782621.00</td>
+                        <td>1394852.10</td>
+                        <td>-2562517.01</td>
+                        <td>-2562517.01</td>
+                        <td>-4345138.01</td>
+                      </tr>
+                      <tr>
+                        <th>557</th>
+                        <td>Cade Cunningham</td>
+                        <td>DET</td>
+                        <td>2088</td>
+                        <td>-1.24</td>
+                        <td>-0.43</td>
+                        <td>1.15</td>
+                        <td>10050120.00</td>
+                        <td>5669208.74</td>
+                        <td>5669208.74</td>
+                        <td>5669208.74</td>
+                        <td>-4380911.26</td>
+                      </tr>
+                      <tr>
+                        <th>1747</th>
+                        <td>Jordan Nwora</td>
+                        <td>MIL</td>
+                        <td>1185</td>
+                        <td>-2.95</td>
+                        <td>-2.56</td>
+                        <td>-1.67</td>
+                        <td>1517981.00</td>
+                        <td>-8220390.87</td>
+                        <td>-3030795.22</td>
+                        <td>-3030795.22</td>
+                        <td>-4548776.22</td>
+                      </tr>
+                      <tr>
+                        <th>2080</th>
+                        <td>Anfernee Simons</td>
+                        <td>POR</td>
+                        <td>1681</td>
+                        <td>2.20</td>
+                        <td>-2.47</td>
+                        <td>2.11</td>
+                        <td>3938818.00</td>
+                        <td>10373418.01</td>
+                        <td>-672809.30</td>
+                        <td>-982592.36</td>
+                        <td>-4611627.30</td>
+                      </tr>
+                      <tr>
+                        <th>1140</th>
+                        <td>De'Andre Hunter</td>
+                        <td>ATL</td>
+                        <td>1577</td>
+                        <td>-1.92</td>
+                        <td>-0.14</td>
+                        <td>0.56</td>
+                        <td>7775400.00</td>
+                        <td>2756675.13</td>
+                        <td>3082006.30</td>
+                        <td>3082006.30</td>
+                        <td>-4693393.70</td>
+                      </tr>
+                      <tr>
+                        <th>1194</th>
+                        <td>Frank Jackson</td>
+                        <td>DET</td>
+                        <td>1164</td>
+                        <td>-1.49</td>
+                        <td>-2.40</td>
+                        <td>-0.68</td>
+                        <td>3000000.00</td>
+                        <td>-3335724.08</td>
+                        <td>-1810324.42</td>
+                        <td>-2620472.92</td>
+                        <td>-4810324.42</td>
+                      </tr>
+                      <tr>
+                        <th>654</th>
+                        <td>Ayo Dosunmu</td>
+                        <td>CHI</td>
+                        <td>2110</td>
+                        <td>-1.50</td>
+                        <td>-2.02</td>
+                        <td>-0.82</td>
+                        <td>925258.00</td>
+                        <td>-4053359.54</td>
+                        <td>-4053359.54</td>
+                        <td>-4053359.54</td>
+                        <td>-4978617.54</td>
+                      </tr>
+                      <tr>
+                        <th>154</th>
+                        <td>Harrison Barnes</td>
+                        <td>SAC</td>
+                        <td>2587</td>
+                        <td>1.18</td>
+                        <td>-1.69</td>
+                        <td>2.97</td>
+                        <td>20284091.00</td>
+                        <td>14614256.53</td>
+                        <td>15046229.53</td>
+                        <td>8837438.51</td>
+                        <td>-5237861.47</td>
+                      </tr>
+                      <tr>
+                        <th>793</th>
+                        <td>Danilo Gallinari</td>
+                        <td>ATL</td>
+                        <td>1672</td>
+                        <td>1.24</td>
+                        <td>-2.06</td>
+                        <td>1.62</td>
+                        <td>20475000.00</td>
+                        <td>7995044.73</td>
+                        <td>15055348.12</td>
+                        <td>16184871.99</td>
+                        <td>-5419651.88</td>
+                      </tr>
+                      <tr>
+                        <th>642</th>
+                        <td>Spencer Dinwiddie</td>
+                        <td>WAS</td>
+                        <td>1330</td>
+                        <td>0.70</td>
+                        <td>-0.68</td>
+                        <td>1.85</td>
+                        <td>19314284.00</td>
+                        <td>9131443.50</td>
+                        <td>13857452.64</td>
+                        <td>11085677.06</td>
+                        <td>-5456831.36</td>
+                      </tr>
+                      <tr>
+                        <th>705</th>
+                        <td>CJ Elleby</td>
+                        <td>POR</td>
+                        <td>1174</td>
+                        <td>-3.14</td>
+                        <td>-2.27</td>
+                        <td>-1.60</td>
+                        <td>1517981.00</td>
+                        <td>-7869213.62</td>
+                        <td>-3963655.36</td>
+                        <td>-3963655.36</td>
+                        <td>-5481636.36</td>
+                      </tr>
+                      <tr>
+                        <th>501</th>
+                        <td>John Collins</td>
+                        <td>ATL</td>
+                        <td>1663</td>
+                        <td>0.64</td>
+                        <td>0.80</td>
+                        <td>3.55</td>
+                        <td>23000000.00</td>
+                        <td>17469683.90</td>
+                        <td>17402996.75</td>
+                        <td>16456204.85</td>
+                        <td>-5597003.25</td>
+                      </tr>
+                      <tr>
+                        <th>929</th>
+                        <td>JaMychal Green</td>
+                        <td>DEN</td>
+                        <td>1085</td>
+                        <td>-2.28</td>
+                        <td>-0.33</td>
+                        <td>0.08</td>
+                        <td>8200000.00</td>
+                        <td>383048.50</td>
+                        <td>2538500.76</td>
+                        <td>2741398.47</td>
+                        <td>-5661499.24</td>
+                      </tr>
+                      <tr>
+                        <th>1120</th>
+                        <td>Al Horford</td>
+                        <td>BOS</td>
+                        <td>2005</td>
+                        <td>-0.14</td>
+                        <td>3.88</td>
+                        <td>6.60</td>
+                        <td>27000000.00</td>
+                        <td>32500081.51</td>
+                        <td>21321774.25</td>
+                        <td>18850445.55</td>
+                        <td>-5678225.75</td>
+                      </tr>
+                      <tr>
+                        <th>95</th>
+                        <td>Cole Anthony</td>
+                        <td>ORL</td>
+                        <td>2059</td>
+                        <td>-0.12</td>
+                        <td>-1.96</td>
+                        <td>0.70</td>
+                        <td>3449400.00</td>
+                        <td>3443227.89</td>
+                        <td>-2374245.65</td>
+                        <td>-2374245.65</td>
+                        <td>-5823645.65</td>
+                      </tr>
+                      <tr>
+                        <th>1791</th>
+                        <td>Cedi Osman</td>
+                        <td>CLE</td>
+                        <td>1462</td>
+                        <td>-0.61</td>
+                        <td>-1.22</td>
+                        <td>0.69</td>
+                        <td>8133334.00</td>
+                        <td>3384862.40</td>
+                        <td>2268483.43</td>
+                        <td>982524.62</td>
+                        <td>-5864850.57</td>
+                      </tr>
+                      <tr>
+                        <th>1060</th>
+                        <td>Buddy Hield</td>
+                        <td>IND</td>
+                        <td>925</td>
+                        <td>2.76</td>
+                        <td>-1.46</td>
+                        <td>1.92</td>
+                        <td>23073234.00</td>
+                        <td>9434676.71</td>
+                        <td>17089709.75</td>
+                        <td>15637595.70</td>
+                        <td>-5983524.25</td>
+                      </tr>
+                      <tr>
+                        <th>1061</th>
+                        <td>Buddy Hield</td>
+                        <td>SAC</td>
+                        <td>1574</td>
+                        <td>0.52</td>
+                        <td>-0.94</td>
+                        <td>1.87</td>
+                        <td>23073234.00</td>
+                        <td>9210711.57</td>
+                        <td>17089709.75</td>
+                        <td>15637595.70</td>
+                        <td>-5983524.25</td>
+                      </tr>
+                      <tr>
+                        <th>1507</th>
+                        <td>Tre Mann</td>
+                        <td>OKC</td>
+                        <td>1367</td>
+                        <td>-2.23</td>
+                        <td>-1.43</td>
+                        <td>-0.64</td>
+                        <td>2901240.00</td>
+                        <td>-3139670.49</td>
+                        <td>-3139670.49</td>
+                        <td>-3139670.49</td>
+                        <td>-6040910.49</td>
+                      </tr>
+                      <tr>
+                        <th>1122</th>
+                        <td>Talen Horton-Tucker</td>
+                        <td>LAL</td>
+                        <td>1511</td>
+                        <td>-2.40</td>
+                        <td>-0.02</td>
+                        <td>0.26</td>
+                        <td>9500000.00</td>
+                        <td>1257139.98</td>
+                        <td>3327278.49</td>
+                        <td>3327278.49</td>
+                        <td>-6172721.51</td>
+                      </tr>
+                      <tr>
+                        <th>1762</th>
+                        <td>Isaac Okoro</td>
+                        <td>CLE</td>
+                        <td>1981</td>
+                        <td>-1.11</td>
+                        <td>0.29</td>
+                        <td>1.94</td>
+                        <td>6720720.00</td>
+                        <td>9560722.64</td>
+                        <td>547715.31</td>
+                        <td>547715.31</td>
+                        <td>-6173004.69</td>
+                      </tr>
+                      <tr>
+                        <th>1428</th>
+                        <td>Caris LeVert</td>
+                        <td>IND</td>
+                        <td>1214</td>
+                        <td>1.70</td>
+                        <td>-1.83</td>
+                        <td>1.61</td>
+                        <td>17500000.00</td>
+                        <td>7930248.31</td>
+                        <td>11279582.78</td>
+                        <td>9248818.11</td>
+                        <td>-6220417.22</td>
+                      </tr>
+                      <tr>
+                        <th>2176</th>
+                        <td>Cam Thomas</td>
+                        <td>BRK</td>
+                        <td>1176</td>
+                        <td>-1.68</td>
+                        <td>-2.51</td>
+                        <td>-0.86</td>
+                        <td>2036280.00</td>
+                        <td>-4220720.55</td>
+                        <td>-4220720.55</td>
+                        <td>-4220720.55</td>
+                        <td>-6257000.55</td>
+                      </tr>
+                      <tr>
+                        <th>469</th>
+                        <td>Josh Christopher</td>
+                        <td>HOU</td>
+                        <td>1334</td>
+                        <td>-1.33</td>
+                        <td>-2.72</td>
+                        <td>-0.89</td>
+                        <td>2259240.00</td>
+                        <td>-4379527.13</td>
+                        <td>-4379527.13</td>
+                        <td>-4379527.13</td>
+                        <td>-6638767.13</td>
+                      </tr>
+                      <tr>
+                        <th>701</th>
+                        <td>Kevin Durant</td>
+                        <td>BRK</td>
+                        <td>2047</td>
+                        <td>5.02</td>
+                        <td>0.63</td>
+                        <td>8.92</td>
+                        <td>42018900.00</td>
+                        <td>43909783.08</td>
+                        <td>35245498.70</td>
+                        <td>33863003.62</td>
+                        <td>-6773401.30</td>
+                      </tr>
+                      <tr>
+                        <th>588</th>
+                        <td>Anthony Davis</td>
+                        <td>LAL</td>
+                        <td>1404</td>
+                        <td>-0.34</td>
+                        <td>2.79</td>
+                        <td>3.73</td>
+                        <td>35361360.00</td>
+                        <td>18392599.31</td>
+                        <td>28364093.42</td>
+                        <td>31384109.56</td>
+                        <td>-6997266.58</td>
+                      </tr>
+                      <tr>
+                        <th>274</th>
+                        <td>Eric Bledsoe</td>
+                        <td>LAC</td>
+                        <td>1361</td>
+                        <td>-2.22</td>
+                        <td>2.03</td>
+                        <td>1.79</td>
+                        <td>18125000.00</td>
+                        <td>8794269.08</td>
+                        <td>11127405.75</td>
+                        <td>18597040.34</td>
+                        <td>-6997594.25</td>
+                      </tr>
+                      <tr>
+                        <th>1323</th>
+                        <td>Luke Kennard</td>
+                        <td>LAC</td>
+                        <td>1919</td>
+                        <td>1.54</td>
+                        <td>-0.67</td>
+                        <td>3.53</td>
+                        <td>13347727.00</td>
+                        <td>17382796.02</td>
+                        <td>6285934.57</td>
+                        <td>5699065.26</td>
+                        <td>-7061792.43</td>
+                      </tr>
+                      <tr>
+                        <th>339</th>
+                        <td>Malcolm Brogdon</td>
+                        <td>IND</td>
+                        <td>1206</td>
+                        <td>2.36</td>
+                        <td>-0.66</td>
+                        <td>2.73</td>
+                        <td>21700000.00</td>
+                        <td>13434176.02</td>
+                        <td>14534725.14</td>
+                        <td>15670510.47</td>
+                        <td>-7165274.86</td>
+                      </tr>
+                      <tr>
+                        <th>1605</th>
+                        <td>Khris Middleton</td>
+                        <td>MIL</td>
+                        <td>2141</td>
+                        <td>2.15</td>
+                        <td>-0.73</td>
+                        <td>4.63</td>
+                        <td>35500000.00</td>
+                        <td>22797506.59</td>
+                        <td>27965678.45</td>
+                        <td>21855381.11</td>
+                        <td>-7534321.55</td>
+                      </tr>
+                      <tr>
+                        <th>203</th>
+                        <td>Darius Bazley</td>
+                        <td>OKC</td>
+                        <td>1924</td>
+                        <td>-3.63</td>
+                        <td>-0.76</td>
+                        <td>-1.61</td>
+                        <td>2513040.00</td>
+                        <td>-7944672.84</td>
+                        <td>-5622110.97</td>
+                        <td>-5622110.97</td>
+                        <td>-8135150.97</td>
+                      </tr>
+                      <tr>
+                        <th>1905</th>
+                        <td>Taurean Prince</td>
+                        <td>MIN</td>
+                        <td>1177</td>
+                        <td>-0.73</td>
+                        <td>-0.12</td>
+                        <td>1.15</td>
+                        <td>13334375.00</td>
+                        <td>5676049.04</td>
+                        <td>4540266.95</td>
+                        <td>2770088.70</td>
+                        <td>-8794108.05</td>
+                      </tr>
+                      <tr>
+                        <th>212</th>
+                        <td>Bradley Beal</td>
+                        <td>WAS</td>
+                        <td>1439</td>
+                        <td>1.07</td>
+                        <td>0.60</td>
+                        <td>3.26</td>
+                        <td>33724200.00</td>
+                        <td>16079010.04</td>
+                        <td>24764950.95</td>
+                        <td>24094394.28</td>
+                        <td>-8959249.05</td>
+                      </tr>
+                      <tr>
+                        <th>1514</th>
+                        <td>Lauri Markkanen</td>
+                        <td>CLE</td>
+                        <td>1878</td>
+                        <td>1.64</td>
+                        <td>-0.89</td>
+                        <td>3.35</td>
+                        <td>15690909.00</td>
+                        <td>16507393.67</td>
+                        <td>6627019.01</td>
+                        <td>8297520.50</td>
+                        <td>-9063889.99</td>
+                      </tr>
+                      <tr>
+                        <th>576</th>
+                        <td>Stephen Curry</td>
+                        <td>GSW</td>
+                        <td>2211</td>
+                        <td>5.63</td>
+                        <td>0.46</td>
+                        <td>10.15</td>
+                        <td>45780966.00</td>
+                        <td>49978989.29</td>
+                        <td>36608772.56</td>
+                        <td>45954528.94</td>
+                        <td>-9172193.44</td>
+                      </tr>
+                      <tr>
+                        <th>1990</th>
+                        <td>Terrence Ross</td>
+                        <td>ORL</td>
+                        <td>1448</td>
+                        <td>-1.66</td>
+                        <td>-3.41</td>
+                        <td>-1.71</td>
+                        <td>12500000.00</td>
+                        <td>-8425587.91</td>
+                        <td>2559014.64</td>
+                        <td>7154098.63</td>
+                        <td>-9940985.36</td>
+                      </tr>
+                      <tr>
+                        <th>1359</th>
+                        <td>Jonathan Kuminga</td>
+                        <td>GSW</td>
+                        <td>1185</td>
+                        <td>-2.23</td>
+                        <td>-2.04</td>
+                        <td>-0.92</td>
+                        <td>5466360.00</td>
+                        <td>-4536778.18</td>
+                        <td>-4536778.18</td>
+                        <td>-4536778.18</td>
+                        <td>-10003138.18</td>
+                      </tr>
+                      <tr>
+                        <th>2070</th>
+                        <td>Pascal Siakam</td>
+                        <td>TOR</td>
+                        <td>2578</td>
+                        <td>1.84</td>
+                        <td>0.08</td>
+                        <td>6.10</td>
+                        <td>33003936.00</td>
+                        <td>30042295.07</td>
+                        <td>22886851.75</td>
+                        <td>18573672.83</td>
+                        <td>-10117084.25</td>
+                      </tr>
+                      <tr>
+                        <th>215</th>
+                        <td>Malik Beasley</td>
+                        <td>MIN</td>
+                        <td>1976</td>
+                        <td>0.69</td>
+                        <td>-2.07</td>
+                        <td>1.38</td>
+                        <td>14491964.00</td>
+                        <td>6797311.89</td>
+                        <td>4339795.55</td>
+                        <td>3989034.47</td>
+                        <td>-10152168.45</td>
+                      </tr>
+                      <tr>
+                        <th>954</th>
+                        <td>Rui Hachimura</td>
+                        <td>WAS</td>
+                        <td>943</td>
+                        <td>-0.88</td>
+                        <td>-2.97</td>
+                        <td>-0.53</td>
+                        <td>4916160.00</td>
+                        <td>-2602700.39</td>
+                        <td>-5420707.15</td>
+                        <td>-5420707.15</td>
+                        <td>-10336867.15</td>
+                      </tr>
+                      <tr>
+                        <th>2325</th>
+                        <td>Trendon Watford</td>
+                        <td>POR</td>
+                        <td>869</td>
+                        <td>-2.68</td>
+                        <td>-4.61</td>
+                        <td>-2.02</td>
+                        <td>768830.00</td>
+                        <td>-9936416.31</td>
+                        <td>-9936416.31</td>
+                        <td>-9936416.31</td>
+                        <td>-10705246.31</td>
+                      </tr>
+                      <tr>
+                        <th>1178</th>
+                        <td>Brandon Ingram</td>
+                        <td>NOP</td>
+                        <td>1869</td>
+                        <td>1.38</td>
+                        <td>-1.09</td>
+                        <td>2.90</td>
+                        <td>29467800.00</td>
+                        <td>14276829.63</td>
+                        <td>18092650.68</td>
+                        <td>8368204.02</td>
+                        <td>-11375149.32</td>
+                      </tr>
+                      <tr>
+                        <th>895</th>
+                        <td>Jerami Grant</td>
+                        <td>DET</td>
+                        <td>1500</td>
+                        <td>-0.52</td>
+                        <td>-0.69</td>
+                        <td>1.18</td>
+                        <td>20002500.00</td>
+                        <td>5794134.12</td>
+                        <td>8129777.16</td>
+                        <td>7394861.52</td>
+                        <td>-11872722.84</td>
+                      </tr>
+                      <tr>
+                        <th>1365</th>
+                        <td>Kyle Kuzma</td>
+                        <td>WAS</td>
+                        <td>2204</td>
+                        <td>-1.75</td>
+                        <td>-0.61</td>
+                        <td>0.43</td>
+                        <td>13000000.00</td>
+                        <td>2121109.08</td>
+                        <td>1048694.82</td>
+                        <td>3342838.40</td>
+                        <td>-11951305.18</td>
+                      </tr>
+                      <tr>
+                        <th>287</th>
+                        <td>Bojan Bogdanovic</td>
+                        <td>UTA</td>
+                        <td>2131</td>
+                        <td>0.39</td>
+                        <td>-2.51</td>
+                        <td>0.70</td>
+                        <td>18700000.00</td>
+                        <td>3427649.38</td>
+                        <td>6732283.26</td>
+                        <td>5408780.89</td>
+                        <td>-11967716.74</td>
+                      </tr>
+                      <tr>
+                        <th>1863</th>
+                        <td>Aleksej Pokusevski</td>
+                        <td>OKC</td>
+                        <td>1233</td>
+                        <td>-2.86</td>
+                        <td>-0.04</td>
+                        <td>-0.10</td>
+                        <td>3113160.00</td>
+                        <td>-469319.04</td>
+                        <td>-9811748.72</td>
+                        <td>-9811748.72</td>
+                        <td>-12924908.72</td>
+                      </tr>
+                      <tr>
+                        <th>1020</th>
+                        <td>Killian Hayes</td>
+                        <td>DET</td>
+                        <td>1647</td>
+                        <td>-3.68</td>
+                        <td>-0.37</td>
+                        <td>-1.10</td>
+                        <td>5572680.00</td>
+                        <td>-5423270.08</td>
+                        <td>-7683832.63</td>
+                        <td>-7683832.63</td>
+                        <td>-13256512.63</td>
+                      </tr>
+                      <tr>
+                        <th>2314</th>
+                        <td>Kemba Walker</td>
+                        <td>NYK</td>
+                        <td>948</td>
+                        <td>-0.26</td>
+                        <td>0.06</td>
+                        <td>1.23</td>
+                        <td>34967442.00</td>
+                        <td>6035930.35</td>
+                        <td>20874934.70</td>
+                        <td>29642234.00</td>
+                        <td>-14092507.30</td>
+                      </tr>
+                      <tr>
+                        <th>774</th>
+                        <td>De'Aaron Fox</td>
+                        <td>SAC</td>
+                        <td>2083</td>
+                        <td>1.88</td>
+                        <td>-2.60</td>
+                        <td>2.17</td>
+                        <td>28103500.00</td>
+                        <td>10688011.28</td>
+                        <td>13978999.75</td>
+                        <td>12165622.50</td>
+                        <td>-14124500.25</td>
+                      </tr>
+                      <tr>
+                        <th>1569</th>
+                        <td>Doug McDermott</td>
+                        <td>SAS</td>
+                        <td>1223</td>
+                        <td>-0.11</td>
+                        <td>-4.53</td>
+                        <td>-1.19</td>
+                        <td>13750000.00</td>
+                        <td>-5850140.53</td>
+                        <td>-376379.90</td>
+                        <td>-1236313.80</td>
+                        <td>-14126379.90</td>
+                      </tr>
+                      <tr>
+                        <th>1879</th>
+                        <td>Kristaps Porzingis</td>
+                        <td>DAL</td>
+                        <td>1002</td>
+                        <td>-0.09</td>
+                        <td>1.21</td>
+                        <td>1.99</td>
+                        <td>31650600.00</td>
+                        <td>9803872.99</td>
+                        <td>16521438.04</td>
+                        <td>16169230.13</td>
+                        <td>-15129161.96</td>
+                      </tr>
+                      <tr>
+                        <th>988</th>
+                        <td>Gary Harris</td>
+                        <td>ORL</td>
+                        <td>1730</td>
+                        <td>-1.12</td>
+                        <td>-0.35</td>
+                        <td>1.13</td>
+                        <td>20932143.00</td>
+                        <td>5580027.09</td>
+                        <td>4782703.29</td>
+                        <td>7618646.99</td>
+                        <td>-16149439.71</td>
+                      </tr>
+                      <tr>
+                        <th>1186</th>
+                        <td>Kyrie Irving</td>
+                        <td>BRK</td>
+                        <td>1091</td>
+                        <td>4.97</td>
+                        <td>-0.86</td>
+                        <td>3.83</td>
+                        <td>35328700.00</td>
+                        <td>18849830.57</td>
+                        <td>19140144.95</td>
+                        <td>22505279.24</td>
+                        <td>-16188555.05</td>
+                      </tr>
+                      <tr>
+                        <th>1504</th>
+                        <td>Theo Maledon</td>
+                        <td>OKC</td>
+                        <td>908</td>
+                        <td>-3.02</td>
+                        <td>-1.17</td>
+                        <td>-0.67</td>
+                        <td>2000000.00</td>
+                        <td>-3283630.34</td>
+                        <td>-14243140.81</td>
+                        <td>-14243140.81</td>
+                        <td>-16243140.81</td>
+                      </tr>
+                      <tr>
+                        <th>931</th>
+                        <td>Jalen Green</td>
+                        <td>HOU</td>
+                        <td>2138</td>
+                        <td>-1.54</td>
+                        <td>-2.73</td>
+                        <td>-1.66</td>
+                        <td>8992080.00</td>
+                        <td>-8198181.37</td>
+                        <td>-8198181.37</td>
+                        <td>-8198181.37</td>
+                        <td>-17190261.37</td>
+                      </tr>
+                      <tr>
+                        <th>1006</th>
+                        <td>Tobias Harris</td>
+                        <td>PHI</td>
+                        <td>2543</td>
+                        <td>0.60</td>
+                        <td>-1.28</td>
+                        <td>2.65</td>
+                        <td>35995950.00</td>
+                        <td>13044484.81</td>
+                        <td>18578650.17</td>
+                        <td>15299264.74</td>
+                        <td>-17417299.83</td>
+                      </tr>
+                      <tr>
+                        <th>2364</th>
+                        <td>Andrew Wiggins</td>
+                        <td>GSW</td>
+                        <td>2329</td>
+                        <td>-0.46</td>
+                        <td>1.50</td>
+                        <td>4.51</td>
+                        <td>31579390.00</td>
+                        <td>22191342.76</td>
+                        <td>13922225.31</td>
+                        <td>11337685.22</td>
+                        <td>-17657164.69</td>
+                      </tr>
+                      <tr>
+                        <th>2014</th>
+                        <td>D'Angelo Russell</td>
+                        <td>MIN</td>
+                        <td>2077</td>
+                        <td>2.79</td>
+                        <td>-1.03</td>
+                        <td>4.81</td>
+                        <td>30013500.00</td>
+                        <td>23710675.14</td>
+                        <td>12059265.48</td>
+                        <td>8101244.55</td>
+                        <td>-17954234.52</td>
+                      </tr>
+                      <tr>
+                        <th>1028</th>
+                        <td>Gordon Hayward</td>
+                        <td>CHA</td>
+                        <td>1564</td>
+                        <td>-0.80</td>
+                        <td>-1.22</td>
+                        <td>0.59</td>
+                        <td>29925000.00</td>
+                        <td>2891804.14</td>
+                        <td>11039919.82</td>
+                        <td>13956758.36</td>
+                        <td>-18885080.18</td>
+                      </tr>
+                      <tr>
+                        <th>881</th>
+                        <td>Eric Gordon</td>
+                        <td>HOU</td>
+                        <td>1669</td>
+                        <td>0.05</td>
+                        <td>-2.67</td>
+                        <td>0.11</td>
+                        <td>18218818.00</td>
+                        <td>521996.10</td>
+                        <td>-1264291.99</td>
+                        <td>4936931.63</td>
+                        <td>-19483109.99</td>
+                      </tr>
+                      <tr>
+                        <th>1476</th>
+                        <td>Kevin Love</td>
+                        <td>CLE</td>
+                        <td>1665</td>
+                        <td>1.93</td>
+                        <td>0.34</td>
+                        <td>4.31</td>
+                        <td>31258256.00</td>
+                        <td>21240647.85</td>
+                        <td>11018718.14</td>
+                        <td>17244880.77</td>
+                        <td>-20239537.86</td>
+                      </tr>
+                      <tr>
+                        <th>951</th>
+                        <td>Blake Griffin</td>
+                        <td>BRK</td>
+                        <td>958</td>
+                        <td>-1.36</td>
+                        <td>3.49</td>
+                        <td>2.39</td>
+                        <td>32405817.00</td>
+                        <td>11776903.57</td>
+                        <td>8527096.91</td>
+                        <td>18068574.03</td>
+                        <td>-23878720.09</td>
+                      </tr>
+                      <tr>
+                        <th>2196</th>
+                        <td>Klay Thompson</td>
+                        <td>GSW</td>
+                        <td>941</td>
+                        <td>1.11</td>
+                        <td>-1.33</td>
+                        <td>1.22</td>
+                        <td>37980720.00</td>
+                        <td>6007864.80</td>
+                        <td>6007864.80</td>
+                        <td>19649759.69</td>
+                        <td>-31972855.20</td>
+                      </tr>
+                      <tr>
+                        <th>2335</th>
+                        <td>Russell Westbrook</td>
+                        <td>LAL</td>
+                        <td>2678</td>
+                        <td>-1.16</td>
+                        <td>-2.07</td>
+                        <td>-0.66</td>
+                        <td>44211146.00</td>
+                        <td>-3246894.61</td>
+                        <td>5014930.24</td>
+                        <td>24076792.02</td>
+                        <td>-39196215.76</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                
+                </div>
+
+                <p class="text-center mt-4">*Some players may be left out due to inconsistencies when merging data sources*</p>
+                
+            </div>
+        </div>
+
+        <!-- 4th row (Analysis) -->
+        <div class="row align-top mt-5 mb-5" id="analysis">
+          <h6 class="display-6 text-center">Analysis</h6>
+            <!-- left column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+              <p class="mt-3 text-article">I will start this section by offering a disclaimer that, once again, the player evaluation is based around 
+                FiveThirtyEight's Raptor WAR. As with all advanced metrics, they are not perfect. There are certainly players (*cough cough* Rudy 
+                Gobert) who inspire fierce debate on if they are as impactful as the advanced stats say they are. For example, advanced metrics still are 
+                flawed when estimating a player's defensive impact.  So, take these values in the context of advanced stats as a whole (maybe you 
+                don't put as much stock into players who are offensively limited but have a ton of defensive value). Another thing I'd like to point
+                out is that WAR is a cumulative stat. Players who play more minutes have more chances to accumulate WAR. Players like Kevin Durant who 
+                have missed a lot of time over the past couple of years may have lower value than you'd expect simply based of the fact that they 
+                haven't been on the court as much. I would argue that availability is inherintly valuable, so this penalty is fair, but you may very well 
+                say that superstar talent compensates for that missed time. Overall, I find this to be an interesting and productive thought exercise. 
+                On that same note, looking at the player valuation results as well as the differences between those values and corresponding salaries 
+                allows us to see several key patterns amongst undervalued and overvalued players. 
+              </p>
+              <p class="text-article">
+                Starting with the undervalued players, there appear to be 2 major categories that players fit into. The first one is superstar 
+                players that have giant Raptor WAR numbers. Nikola Jokic, Giannis Antetokounmpo, and Jayson Tatum are three players that have large 
+                contracts, but are so good that they are still undervalued anyways. These are 10 plus WAR players that are durable enough to play a 
+                lot of games to accumulate these massive WAR totals. The next category, which is much more prominent, are good to great players 
+                that are on rookie contracts. Players like Mikal Bridges, Franz Wagner, and Desmond Bane all have WARs between 5 and 8, but are on 
+                such cheap contracts that they are immensely valuable. Finally, these two groups are NOT mutually exclusive. Luka Doncic is a prime 
+                example of a superstar player that is on a rookie contract.
+              </p>
+            </div>
+            <!-- right column -->
+            <div class="col-6 col-lg-6 col-xl-6">
+              <p class="mt-3 text-right">
+                Transitioning to the overvalued players, we see the exact opposite of the two groups above. The overvalued players are either 
+                young players who post such terrible WAR values that they are overvalued no matter how much they're paid, or aging players who are 
+                being paid based on past performance. For the first group, there are players like Jalen Green and Killian Hayes that are posting 
+                negative WAR seasons, hence they are overvalued despite being on rookie contracts. On the other hand, the more prominent group we 
+                see for overvalued players are players such as Russell Westbrook, Blake Griffin, and Kevin Love that are in their 30s and making 30 
+                million dollars or more. Even though these are solid players who in some cases are even posting slight positive WARs, they make 
+                more money than they are worth at this stage of their careers. One other interesting pattern that we see is that older injury prone 
+                players on large contracts such as Klay Thompson show up on the most overvalued players list. I would hold off on calling these players
+                overvalued until we see what they look like post recovery.
+              </p>
+              <p class="text-right">
+                Overall, I think there are a few informative points to take away from this exercise. Firstly, just because a great player makes a 
+                max contract, doesn't mean that they are paid what they deserve. Based on what these superstars bring to the table compared to a 
+                replacement player, they should be paid more (the NBA salary rules don't allow it though). Another key takeaway is that 
+                oftentimes the worst players aren't actually the least valuable. The least valuable players in today's NBA are declining veterans 
+                who are being paid for past performance. In fact, in some cases, these players even have a positive impact for their teams. 
+                Having a positive impact does not necessarily mean you are not overvalued. The final takeaway I'd like to point out is the 
+                duality of rookie contracts. On one hand you have good to great rookie players who make so much less than they deserve due to the 
+                rookie contract system, but on the other hand some of these young players are so bad initially, that they aren't valuable no 
+                matter how much they're paid.
+              </p>
+            </div>
+        </div>
+
+        <!-- Return to homepage link -->
+        <div class="align-bottom mt-5 mb-3 text-center align-items-center">
+            <a href="#top">Return to Top of Page</a>
+        </div>
+
+
+    </article>
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+    <!-- to enable special table functions (want to order predicted BPM in descending order) -->
+    <script>
+        $(document).ready(function () {
+            $('#main-table').DataTable( {
+                order: [[11, 'desc']],
+            });
+        });
+    </script>
+
+</body>
+</html>
