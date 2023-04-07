@@ -95,8 +95,8 @@
                 <figure class="mt-5">
                     <!-- <figcaption class="mb-2 text-center fig-title-right">Figure 1</figcaption> -->
                     <img src="images/sample_transfer_data_2023.png" alt="Sample Transfer Data 2023">
-                    <figcaption class="mt-3 text-center">First 6 Rows of the Data I Used my Model on to Predict Effective 2022-23 Transfers</figcaption>
-                    <figcaption class="mt-1 text-center">Note: The Post_BPM column will be updated once the 2022-23 season is completed</figcaption>
+                    <figcaption class="mt-3 text-center">First 5 Rows of the Data I Used my Model on to Predict Effective 2022-23 Transfers</figcaption>
+                    
 
                 </figure>
             </div>
@@ -3474,15 +3474,39 @@
             </div>
         </div>
 
-        <!-- 6th row (Analysis) -->
-        <div class="align-top mt-5 mb-5" id="analysis">
-            <h6 class="display-6 text-center">Analysis</h6>
-            <p class="text-center mt-2">Come back for full analysis upon the completion of the 2022-23 season</p>
-        </div>
-
-        <!-- Return to homepage link -->
-        <div class="align-bottom mt-5 mb-3 text-center align-items-center">
-            <a href="#top">Return to Top of Page</a>
+        <!-- Sixth  row (Analysis) -->
+        <div class="row align-top mt-5 mb-5" id="analysis">
+          <h6 class="display-6 text-center">Analysis</h6>
+          <!-- Left column -->
+          <div class="col-6 col-lg-6 col-xl-6">
+              <p class="text-article mt-3">
+                After the completion of the 2022-23 NCAA basketball season, it is time to go back and evaluate my transfer predictions. As a reminder, 
+                the goal of this model is to identify “effective” college basketball transfers. What exactly “effective” means is subjective, but for 
+                this case I've decided to evaluate an effective transfer as one who has matched or exceeded a BPM value of two. I'm choosing this 
+                benchmark because I believe that outscoring an opponent by two more points per 100 possessions compared to an average producer qualifies 
+                you as an “effective” player. Once again, there are many valid opinions on what makes an effective player, and many of those pay no 
+                consideration to BPM. With that being said, BPM provides a quality advanced statistic that can serve as a useful benchmark for evaluation.
+              </p>
+              <p class="text-article mt-3">
+                Now for the question of how accurate my model was in predicting effective transfers. Of the 130 transfers that my model predicted to 
+                have a BPM value greater than or equal to 2, 93 of them actually did. In other words, for every four transfers my model predicted to
+                be “effective”, about three of them actually were (~72% accuracy).
+              </p>
+          </div>
+          <!-- Right column -->
+          <div class="col-6 col-lg-6 col-xl-6">
+              <p class="text-right mt-3"> 
+                Additionally, of those 37 errors, only 17 of them ended up being 
+                negative BPM players, meaning that the team was worse with that player on the floor compared to the average player production. This means 
+                that approximately 87% of the time my model predicted a player to be an “effective” transfer, they were at least not a negative contributor.
+                With how many variables go into a player's impact on their new team after transferring, I would say that the model did a strong job of 
+                accurately predicting effective transfers this year. In terms of errors going the other way around (predicted to NOT be effective but 
+                actually were) my model was also very accurate. Approximately 81% of the time a player was predicted to have a BPM less than 2 by my model, 
+                they actually did. With that being said, this kind of error is not as impactful as the first case. If you are expecting someone to be an 
+                effective player and they aren't, that is much more damaging than expecting someone to not be an effective player and being pleasantly 
+                surprised when they are.
+              </p>
+          </div>
         </div>
 
 
